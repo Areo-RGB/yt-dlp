@@ -34,7 +34,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "resources": {
       "../browser-extension": "browser-extension"
     },
@@ -51,6 +51,12 @@
       "desktop": {
         "schemes": ["ytdlp-gui"]
       }
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlGMzY4RTMxNjExRTZDM0QKUldROWJCNWhNWTQybjZaSUh1cGJoMFFMclA1dGZ2Z3ZEa3lLMlRZMTVXQWhOWU9KckpLMU1LUjkK",
+      "endpoints": [
+        "https://github.com/Areo-RGB/yt-dlp/releases/latest/download/latest.json"
+      ]
     }
   }
 }
