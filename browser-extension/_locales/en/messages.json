@@ -1,0 +1,68 @@
+{
+  "extName": {
+    "message": "YDL GUI Helper"
+  },
+  "extDesc": {
+    "message": "Send video URLs and cookies from your browser to the YDL GUI desktop app."
+  },
+  "popupSupported": {
+    "message": "This page can be sent to yt-dlp"
+  },
+  "popupUnsupported": {
+    "message": "Only HTTP and HTTPS pages can be sent"
+  },
+  "popupChecking": {
+    "message": "Checking page…"
+  },
+  "popupSendCookies": {
+    "message": "Send page cookies"
+  },
+  "popupSendCookiesHint": {
+    "message": "Required for members-only or login-restricted videos"
+  },
+  "popupSendBtn": {
+    "message": "Send to YDL GUI"
+  },
+  "popupSending": {
+    "message": "Sending…"
+  },
+  "popupSent": {
+    "message": "Sent! Switch to YDL GUI"
+  },
+  "popupFailed": {
+    "message": "Failed to send, please try again"
+  },
+  "popupAppNotFoundTitle": {
+    "message": "Did the app open?"
+  },
+  "popupAppNotFoundDesc": {
+    "message": "If nothing happened, make sure YDL GUI is installed and running."
+  },
+  "popupDownload": {
+    "message": "Download YDL GUI"
+  },
+  "menuSendPage": {
+    "message": "Send page to YDL GUI"
+  },
+  "menuSendLink": {
+    "message": "Download link with YDL GUI"
+  },
+  "menuSendSelection": {
+    "message": "Send selected URL to YDL GUI"
+  },
+  "notifyTitle": {
+    "message": "YDL GUI Helper"
+  },
+  "notifySent": {
+    "message": "Request sent to YDL GUI"
+  },
+  "notifyFailed": {
+    "message": "Could not open YDL GUI. Make sure the app is installed."
+  },
+  "notifyUnsupported": {
+    "message": "This URL is not from a supported video site."
+  },
+  "badgeOn": {
+    "message": "↓"
+  }
+}

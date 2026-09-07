@@ -1,0 +1,92 @@
+{
+  "name": "yt-dlp-gui",
+  "private": true,
+  "version": "0.7.0",
+  "description": "A modern, cross-platform desktop GUI for yt-dlp — download videos from YouTube, Bilibili, Twitter and 1000+ sites. Built with Tauri 2 + Vue 3.",
+  "keywords": [
+    "yt-dlp",
+    "yt-dlp-gui",
+    "youtube-downloader",
+    "video-downloader",
+    "tauri",
+    "vue",
+    "desktop-app",
+    "bilibili",
+    "twitter",
+    "cross-platform",
+    "gui"
+  ],
+  "author": {
+    "name": "imsyy",
+    "url": "https://github.com/imsyy"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imsyy/yt-dlp-gui"
+  },
+  "homepage": "https://github.com/imsyy/yt-dlp-gui#readme",
+  "bugs": {
+    "url": "https://github.com/imsyy/yt-dlp-gui/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@12.3.4",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build --no-bundle",
+    "tauri:build:debug": "tauri build --debug --no-bundle",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.{vue,ts,js,scss,css,json}\"",
+    "sync:build": "./sync-build.sh"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-deep-link": "^2.4.9",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-notification": "^2.3.3",
+    "@tauri-apps/plugin-opener": "^2.5.4",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/plugin-updater": "~2.10.1",
+    "@vueuse/core": "^14.3.0",
+    "localforage": "^1.10.0",
+    "lodash-es": "^4.18.1",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "vue": "^3.5.34",
+    "vue-i18n": "^11.4.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/simple-icons": "^1.2.94",
+    "@tauri-apps/cli": "^2.11.1",
+    "@types/node": "^25.6.2",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.9.1",
+    "globals": "^17.6.0",
+    "naive-ui": "^2.44.1",
+    "prettier": "^3.8.3",
+    "sass-embedded": "^1.99.0",
+    "typescript": "~5.6.3",
+    "typescript-eslint": "^8.59.2",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-icons": "^23.0.1",
+    "unplugin-vue-components": "^32.0.0",
+    "vite": "^8.0.11",
+    "vite-plugin-vue-mcp": "^0.3.2",
+    "vue-router": "^5.0.6",
+    "vue-tsc": "^2.2.12"
+  }
+}

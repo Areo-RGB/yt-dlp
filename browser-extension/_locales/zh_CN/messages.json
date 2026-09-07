@@ -1,0 +1,68 @@
+{
+  "extName": {
+    "message": "YDL GUI 助手"
+  },
+  "extDesc": {
+    "message": "把视频网址和浏览器 Cookie 一键发送到 YDL GUI 桌面应用进行下载。"
+  },
+  "popupSupported": {
+    "message": "可将此页面发送给 yt-dlp 尝试解析"
+  },
+  "popupUnsupported": {
+    "message": "仅支持发送 HTTP 和 HTTPS 页面"
+  },
+  "popupChecking": {
+    "message": "正在识别页面…"
+  },
+  "popupSendCookies": {
+    "message": "同时发送 Cookie"
+  },
+  "popupSendCookiesHint": {
+    "message": "下载会员/登录后才能观看的视频时需要"
+  },
+  "popupSendBtn": {
+    "message": "发送到 YDL GUI"
+  },
+  "popupSending": {
+    "message": "发送中…"
+  },
+  "popupSent": {
+    "message": "已发送，切换到 YDL GUI 查看"
+  },
+  "popupFailed": {
+    "message": "发送失败，请重试"
+  },
+  "popupAppNotFoundTitle": {
+    "message": "应用没有打开？"
+  },
+  "popupAppNotFoundDesc": {
+    "message": "如果没有任何反应，请确认 YDL GUI 已安装并保持运行。"
+  },
+  "popupDownload": {
+    "message": "下载 YDL GUI"
+  },
+  "menuSendPage": {
+    "message": "把当前页面发送到 YDL GUI"
+  },
+  "menuSendLink": {
+    "message": "用 YDL GUI 下载此链接"
+  },
+  "menuSendSelection": {
+    "message": "把选中的链接发送到 YDL GUI"
+  },
+  "notifyTitle": {
+    "message": "YDL GUI 助手"
+  },
+  "notifySent": {
+    "message": "已请求 YDL GUI 处理"
+  },
+  "notifyFailed": {
+    "message": "无法唤起 YDL GUI，请确认应用已安装。"
+  },
+  "notifyUnsupported": {
+    "message": "该链接不在支持的视频站点列表中。"
+  },
+  "badgeOn": {
+    "message": "↓"
+  }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="hd">
+    <img class="hd-logo" src="icons/app-icon.svg" alt="" aria-hidden="true">
+    <h1 class="hd-title">YDL GUI Helper</h1>
+    <select id="language" class="language" aria-label="Language">
+      <option value="en">English</option>
+      <option value="zh_CN">中文</option>
+    </select>
+  </header>
+
+  <main class="body">
+    <div id="status" class="pill pill-muted">
+      <span class="dot"></span>
+      <span id="status-text" data-i18n="popupChecking"></span>
+    </div>
+
+    <div id="url-preview" class="url" hidden></div>
+
+    <div class="row" id="cookie-row">
+      <div class="row-text">
+        <div class="row-label" data-i18n="popupSendCookies"></div>
+        <div class="row-hint" data-i18n="popupSendCookiesHint"></div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="send-cookies" checked>
+        <span class="track"></span>
+      </label>
+    </div>
+
+    <button class="btn" id="send-btn" disabled>
+      <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+      <span id="btn-text" data-i18n="popupSendBtn"></span>
+    </button>
+
+    <div id="fallback" class="fallback" hidden>
+      <div class="fallback-title" data-i18n="popupAppNotFoundTitle"></div>
+      <div class="fallback-desc" data-i18n="popupAppNotFoundDesc"></div>
+      <a id="fallback-link"
+         class="fallback-link"
+         href="https://github.com/imsyy/yt-dlp-gui/releases/latest"
+         target="_blank"
+         rel="noopener"
+         data-i18n="popupDownload"></a>
+    </div>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
