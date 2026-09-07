@@ -167,6 +167,16 @@ const playVideo = async (video: LocalVideo) => {
   }
 };
 
+const splitChapters = async (video: LocalVideo) => {
+  try {
+    await invoke("split_video_chapters", { inputPath: video.path });
+  } catch (err) {
+    window.$message.error(
+      err instanceof Error ? err.message : String(err) || t("localFiles.splitChaptersFailed"),
+    );
+  }
+};
+
 const deleteVideo = (video: LocalVideo) => {
   window.$dialog.warning({
     title: t("localFiles.deleteVideoTitle"),
@@ -381,6 +391,9 @@ onMounted(() => {
                   </n-button>
                   <n-button v-if="uploadedUrls[video.path]" text size="tiny" type="success" :title="$t('localFiles.copyR2Url')" @click="copyR2Url(video)">
                     <template #icon><n-icon><icon-mdi-link-variant /></n-icon></template>
+                  </n-button>
+                  <n-button text size="tiny" type="primary" :title="$t('localFiles.splitChapters')" @click="splitChapters(video)">
+                    <template #icon><n-icon><icon-mdi-content-cut /></n-icon></template>
                   </n-button>
                   <n-button text size="tiny" @click="copyPath(video.path)">
                     <template #icon><n-icon><icon-mdi-content-copy /></n-icon></template>

@@ -65,7 +65,9 @@
     "r2Uploaded": "Uploaded to R2; public URL copied",
     "r2UrlCopied": "R2 public URL copied",
     "r2Available": "Available on Cloudflare R2",
-    "copyR2Url": "Copy R2 public URL"
+    "copyR2Url": "Copy R2 public URL",
+    "splitChapters": "Split video by chapters",
+    "splitChaptersFailed": "Failed to start chapter splitting"
   },
   "pending": {
     "empty": "No pending items",

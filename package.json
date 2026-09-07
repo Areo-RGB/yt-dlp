@@ -39,7 +39,7 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build --no-bundle",
+    "tauri:build": "tauri build",
     "tauri:build:debug": "tauri build --debug --no-bundle",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint src/",
