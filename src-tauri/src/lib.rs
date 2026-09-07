@@ -90,6 +90,7 @@ pub fn run() {
             commands::scan_local_files,
             commands::delete_local_file,
             commands::delete_local_folder,
+            commands::split_video_chapters,
             commands::upload_local_video_to_r2,
             commands::tool_download_thumbnail,
             commands::tool_fetch_thumbnails,

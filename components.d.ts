@@ -33,6 +33,7 @@ declare module 'vue' {
     IconMdiCogOutline: typeof import('~icons/mdi/cog-outline')['default']
     IconMdiCommentTextMultipleOutline: typeof import('~icons/mdi/comment-text-multiple-outline')['default']
     IconMdiContentCopy: typeof import('~icons/mdi/content-copy')['default']
+    IconMdiContentCut: typeof import('~icons/mdi/content-cut')['default']
     IconMdiContentPaste: typeof import('~icons/mdi/content-paste')['default']
     IconMdiContentSaveOutline: typeof import('~icons/mdi/content-save-outline')['default']
     IconMdiDeleteOutline: typeof import('~icons/mdi/delete-outline')['default']

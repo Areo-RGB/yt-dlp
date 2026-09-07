@@ -6,6 +6,13 @@ use serde::Serialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
+use tauri::path::BaseDirectory;
+use tauri::Manager;
+
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+use crate::utils;
 
 const VIDEO_EXTENSIONS: &[&str] = &["mp4", "mkv", "webm", "mov", "m4v", "avi"];
 const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp"];
@@ -176,4 +183,78 @@ pub fn delete_local_folder(root_path: String, folder_path: String) -> Result<(),
         return Err("err_local_files_outside_root".to_string());
     }
     fs::remove_dir_all(folder).map_err(|error| format!("err_local_files_delete:{error}"))
+}
+
+#[tauri::command]
+pub fn split_video_chapters(app: tauri::AppHandle, input_path: String) -> Result<(), String> {
+    let input = PathBuf::from(&input_path);
+    if !input.is_file() {
+        return Err("err_split_input_not_file".to_string());
+    }
+
+    let script = app
+        .path()
+        .resolve("scripts/split_chapters.py", BaseDirectory::Resource)
+        .ok()
+        .filter(|path| path.is_file())
+        .or_else(|| {
+            let development_path =
+                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../scripts/split_chapters.py");
+            development_path.is_file().then_some(development_path)
+        })
+        .ok_or_else(|| "err_split_script_not_found".to_string())?;
+    let ffmpeg = utils::get_ffmpeg_path(&app)?;
+    let ffprobe = utils::get_ffprobe_path(&app)?;
+    let python = which::which("py")
+        .or_else(|_| which::which("python"))
+        .map_err(|_| "err_split_python_not_found".to_string())?;
+    let input_parent = input
+        .parent()
+        .ok_or_else(|| "err_split_input_not_file".to_string())?;
+
+    #[cfg(target_os = "windows")]
+    {
+        let mut command = std::process::Command::new("cmd");
+        command
+            .arg("/K")
+            .arg(&python)
+            .arg(&script)
+            .arg(&input)
+            .arg("--ffmpeg")
+            .arg(&ffmpeg)
+            .arg("--ffprobe")
+            .arg(&ffprobe)
+            .current_dir(input_parent)
+            .creation_flags(0x00000010);
+        command
+            .spawn()
+            .map_err(|error| format!("err_split_terminal:{error}"))?;
+        return Ok(());
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let (terminal, terminal_args) = [
+            ("x-terminal-emulator", ["-e"].as_slice()),
+            ("gnome-terminal", ["--"].as_slice()),
+            ("konsole", ["-e"].as_slice()),
+        ]
+        .iter()
+        .find_map(|(name, args)| which::which(name).ok().map(|path| (path, *args)))
+        .ok_or_else(|| "err_split_terminal_not_found".to_string())?;
+
+        std::process::Command::new(terminal)
+            .args(terminal_args)
+            .arg(&python)
+            .arg(&script)
+            .arg(&input)
+            .arg("--ffmpeg")
+            .arg(&ffmpeg)
+            .arg("--ffprobe")
+            .arg(&ffprobe)
+            .current_dir(input_parent)
+            .spawn()
+            .map_err(|error| format!("err_split_terminal:{error}"))?;
+        Ok(())
+    }
 }

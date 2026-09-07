@@ -192,6 +192,24 @@ const handleOpenFolder = async (task: DownloadTask) => {
   }
 };
 
+const handleSplitChapters = async (task: DownloadTask) => {
+  if (!task.outputFile) return;
+  try {
+    const [exists] = await invoke<boolean[]>("check_files_exist", {
+      paths: [task.outputFile],
+    });
+    if (!exists) {
+      window.$message.warning(t("downloads.fileDeletedOrMoved"));
+      return;
+    }
+    await invoke("split_video_chapters", { inputPath: task.outputFile });
+  } catch (e: unknown) {
+    window.$message.error(
+      e instanceof Error ? e.message : String(e) || t("downloads.splitChaptersFailed"),
+    );
+  }
+};
+
 const handleOpenSource = async (url: string) => {
   try {
     await openUrl(url);
@@ -548,6 +566,19 @@ const handleClearFinished = () => {
                         </template>
                       </n-button>
                       <n-divider vertical style="margin: 0 2px" />
+                      <n-button
+                        v-if="task.status === 'completed' && task.outputFile"
+                        size="tiny"
+                        strong
+                        secondary
+                        type="primary"
+                        :title="$t('downloads.splitChapters')"
+                        @click="handleSplitChapters(task)"
+                      >
+                        <template #icon>
+                          <n-icon size="16"><icon-mdi-content-cut /></n-icon>
+                        </template>
+                      </n-button>
                       <n-button
                         v-if="task.status === 'completed'"
                         size="tiny"

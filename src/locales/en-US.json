@@ -124,6 +124,8 @@
     "fileNotExist": "File not found",
     "fileDeletedOrMoved": "The file has been deleted or moved. Remove this record from the list?",
     "openFolderFailed": "Failed to open folder",
+    "splitChapters": "Split video by chapters",
+    "splitChaptersFailed": "Failed to start chapter splitting",
     "pauseDownload": "Pause Download",
     "confirmPause": "Are you sure you want to pause the current download?",
     "pauseFailed": "Failed to pause",
