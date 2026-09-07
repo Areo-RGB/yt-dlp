@@ -469,5 +469,9 @@
     "denoHint": "Deno — среда выполнения JavaScript, необходимая yt-dlp для анализа информации о видео YouTube. Установка позволяет получить полный список форматов, включая варианты более высокого качества.",
     "goToSettings": "Перейти в Настройки",
     "later": "Позже"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

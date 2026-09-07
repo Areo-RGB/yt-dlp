@@ -469,5 +469,9 @@
     "denoHint": "Deno là môi trường JavaScript mà yt-dlp cần để phân tích thông tin video YouTube. Cài Deno cho phép truy cập danh sách định dạng đầy đủ, gồm cả chất lượng cao hơn.",
     "goToSettings": "Đến Cài đặt",
     "later": "Để sau"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

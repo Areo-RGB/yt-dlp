@@ -469,5 +469,9 @@
     "denoHint": "Deno é um runtime JavaScript que o yt-dlp precisa para analisar informações de vídeos do YouTube. Instalá-lo dá acesso à lista completa de formatos, incluindo qualidades superiores.",
     "goToSettings": "Ir para Configurações",
     "later": "Mais tarde"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

@@ -508,5 +508,9 @@
     "denoHint": "A Deno egy, a yt-dlp által használt JavaScript-futtatókörnyezet a videóadatok beolvasására. Ha telepíti a Denót, akkor minden formátumi- és minőséglehetőség elérhetővé válik.",
     "goToSettings": "Ugrás a beállításokhoz",
     "later": "Majd később"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

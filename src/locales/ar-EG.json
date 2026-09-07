@@ -469,5 +469,9 @@
     "denoHint": "Deno هي بيئة تشغيل جافا سكريبت يحتاجها yt-dlp لتحليل معلومات فيديوهات يوتيوب. تثبيتها يتيح لك الوصول لكامل قائمة التنسيقات والجودات العالية.",
     "goToSettings": "الذهاب للإعدادات",
     "later": "لاحقاً"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

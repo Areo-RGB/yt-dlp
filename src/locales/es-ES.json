@@ -469,5 +469,9 @@
     "denoHint": "Deno es un entorno de ejecución JavaScript necesario para que yt-dlp analice la información de videos de YouTube. Instalarlo permite obtener la lista completa de formatos, incluyendo opciones de mayor calidad.",
     "goToSettings": "Ir a Ajustes",
     "later": "Más tarde"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

@@ -469,5 +469,9 @@
     "denoHint": "Deno は yt-dlp が YouTube の動画情報を解析するために必要な JavaScript ランタイムです。インストールすると、より高画質のオプションを含む完全なフォーマットリストが取得できます。",
     "goToSettings": "設定へ移動",
     "later": "後で"
+  },
+  "localFiles": {
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   }
 }

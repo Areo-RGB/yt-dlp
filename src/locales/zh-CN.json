@@ -63,7 +63,9 @@
     "deleted": "已删除",
     "uploadToR2": "上传到 Cloudflare R2",
     "r2Uploaded": "已上传到 R2，公开链接已复制",
-    "r2UrlCopied": "R2 公开链接已复制"
+    "r2UrlCopied": "R2 公开链接已复制",
+    "r2Available": "已上传到 Cloudflare R2",
+    "copyR2Url": "复制 R2 公开链接"
   },
   "pending": {
     "empty": "暂无待下载项目",
@@ -189,7 +191,6 @@
     "r2BucketPlaceholder": "R2 存储桶名称",
     "r2PublicBaseUrl": "公开基础 URL",
     "r2PublicBaseUrlPlaceholder": "https://pub-...r2.dev",
-
     "youtubeAdvancedDesc": "PO Token 与 visitor_data 用于绕过部分 YouTube 视频的 403 错误和速率限制，不需要时留空，详见 yt-dlp wiki: Extractors > YouTube > PO Token Guide",
     "youtubePoToken": "PO Token",
     "youtubePoTokenPlaceholder": "例如：mweb.gvs+XXXXXXXX...",

@@ -17,7 +17,39 @@ const searchQuery = ref("");
 const isLoading = ref(false);
 const error = ref("");
 const uploading = ref<Record<string, boolean>>({});
-const uploadedUrls = ref<Record<string, string>>({});
+
+const R2_URLS_STORAGE_KEY = "r2-uploaded-urls-v1";
+
+const loadStoredR2Urls = (): Record<string, string> => {
+  try {
+    const raw = localStorage.getItem(R2_URLS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    if (!parsed || typeof parsed !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        ([key, value]) =>
+          typeof key === "string" && typeof value === "string" && value.startsWith("http"),
+      ),
+    );
+  } catch {
+    return {};
+  }
+};
+
+const uploadedUrls = ref<Record<string, string>>(loadStoredR2Urls());
+
+watch(
+  uploadedUrls,
+  (value) => {
+    try {
+      localStorage.setItem(R2_URLS_STORAGE_KEY, JSON.stringify(value));
+    } catch {
+      // Ignore storage quota errors; URLs remain available for this session.
+    }
+  },
+  { deep: true },
+);
 
 const selectedFolder = computed(
   () => folders.value.find((folder) => folder.path === selectedFolderPath.value) ?? null,
@@ -113,6 +145,12 @@ const copyPath = async (path: string) => {
   await copyText(path, t("localFiles.pathCopied"), t("localFiles.copyFailed"));
 };
 
+const copyR2Url = async (video: LocalVideo) => {
+  const url = uploadedUrls.value[video.path];
+  if (!url) return;
+  await copyText(url, t("localFiles.r2UrlCopied"), t("localFiles.copyFailed"));
+};
+
 const openFolder = async (folder: LocalFolder) => {
   try {
     await revealItemInDir(folder.path);
@@ -138,6 +176,7 @@ const deleteVideo = (video: LocalVideo) => {
     onPositiveClick: async () => {
       try {
         await invoke("delete_local_file", { rootPath: rootPath.value, filePath: video.path });
+        delete uploadedUrls.value[video.path];
         await loadLibrary();
         window.$message.success(t("localFiles.deleted"));
       } catch (err) {
@@ -192,6 +231,9 @@ const deleteFolder = (folder: LocalFolder) => {
     onPositiveClick: async () => {
       try {
         await invoke("delete_local_folder", { rootPath: rootPath.value, folderPath: folder.path });
+        for (const video of folder.videos) {
+          delete uploadedUrls.value[video.path];
+        }
         await loadLibrary();
         window.$message.success(t("localFiles.deleted"));
       } catch (err) {
@@ -290,7 +332,10 @@ onMounted(() => {
             </n-flex>
           </template>
           <template #header-extra>
-            <n-flex :size="4">
+            <n-flex :size="4" align="center">
+              <n-tag v-if="selectedFolder.videos.some((video) => uploadedUrls[video.path])" size="small" round type="success" :title="$t('localFiles.r2Available')">
+                R2 {{ selectedFolder.videos.filter((video) => uploadedUrls[video.path]).length }}/{{ selectedFolder.videos.length }}
+              </n-tag>
               <n-button text size="small" type="primary" :title="$t('localFiles.uploadToR2')" :loading="selectedFolder.videos.some((video) => uploading[video.path])" :disabled="selectedFolder.videos.length === 0" @click="uploadFolder(selectedFolder)">
                 <template #icon><n-icon><icon-simple-icons-cloudflare /></n-icon></template>
               </n-button>
@@ -316,13 +361,26 @@ onMounted(() => {
                   playsinline
                 />
                 <div class="play-overlay"><n-icon size="30"><icon-mdi-play /></n-icon></div>
+                <n-tooltip v-if="uploadedUrls[video.path]" trigger="hover">
+                  <template #trigger>
+                    <div class="cloud-badge" :title="$t('localFiles.copyR2Url')" @click.stop="copyR2Url(video)">
+                      <n-icon size="13"><icon-mdi-cloud-check /></n-icon>
+                      <span>R2</span>
+                    </div>
+                  </template>
+                  {{ $t("localFiles.r2Available") }}
+                </n-tooltip>
               </div>
               <div class="video-info">
                 <n-ellipsis :line-clamp="2" :tooltip="false">{{ video.name }}</n-ellipsis>
                 <n-text depth="3" class="video-meta">{{ formatSize(video.size) }} · {{ formatDate(video.modified) }}</n-text>
-                <n-flex :size="4" justify="end">
-                  <n-button text size="tiny" type="primary" :loading="uploading[video.path]" :title="$t('localFiles.uploadToR2')" @click="uploadVideo(video, selectedFolder)">
+                <n-flex :size="4" justify="end" align="center">
+                  <n-tag v-if="uploadedUrls[video.path]" size="tiny" round type="success" :title="$t('localFiles.r2Available')">R2</n-tag>
+                  <n-button text size="tiny" :type="uploadedUrls[video.path] ? 'success' : 'primary'" :loading="uploading[video.path]" :title="uploadedUrls[video.path] ? $t('localFiles.copyR2Url') : $t('localFiles.uploadToR2')" @click="uploadVideo(video, selectedFolder)">
                     <template #icon><n-icon><icon-simple-icons-cloudflare /></n-icon></template>
+                  </n-button>
+                  <n-button v-if="uploadedUrls[video.path]" text size="tiny" type="success" :title="$t('localFiles.copyR2Url')" @click="copyR2Url(video)">
+                    <template #icon><n-icon><icon-mdi-link-variant /></n-icon></template>
                   </n-button>
                   <n-button text size="tiny" @click="copyPath(video.path)">
                     <template #icon><n-icon><icon-mdi-content-copy /></n-icon></template>
@@ -475,6 +533,28 @@ onMounted(() => {
 
 .video-cover:hover .play-overlay {
   opacity: 1;
+}
+
+.cloud-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(24, 160, 88, 0.92);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cloud-badge:hover {
+  background: rgba(24, 160, 88, 1);
 }
 
 .video-info {

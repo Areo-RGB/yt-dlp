@@ -63,7 +63,9 @@
     "deleted": "Deleted",
     "uploadToR2": "Upload to Cloudflare R2",
     "r2Uploaded": "Uploaded to R2; public URL copied",
-    "r2UrlCopied": "R2 public URL copied"
+    "r2UrlCopied": "R2 public URL copied",
+    "r2Available": "Available on Cloudflare R2",
+    "copyR2Url": "Copy R2 public URL"
   },
   "pending": {
     "empty": "No pending items",
@@ -189,7 +191,6 @@
     "r2BucketPlaceholder": "R2 bucket name",
     "r2PublicBaseUrl": "Public base URL",
     "r2PublicBaseUrlPlaceholder": "https://pub-...r2.dev",
-
     "youtubeAdvancedDesc": "PO Token and visitor_data help bypass YouTube 403 errors and rate-limiting on certain videos. Leave blank if not needed. See yt-dlp wiki: Extractors > YouTube > PO Token Guide.",
     "youtubePoToken": "PO Token",
     "youtubePoTokenPlaceholder": "e.g. mweb.gvs+XXXXXXXX...",

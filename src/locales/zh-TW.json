@@ -469,5 +469,9 @@
     "denoHint": "Deno 是 yt-dlp 解析 YouTube 影片資訊所需的 JavaScript 執行環境。安裝後可取得完整的格式清單，包括更高畫質的選項。",
     "goToSettings": "前往設定",
     "later": "稍後再說"
+  },
+  "localFiles": {
+    "r2Available": "已上傳到 Cloudflare R2",
+    "copyR2Url": "複製 R2 公開連結"
   }
 }
