@@ -42,7 +42,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libpipewire-0.3-dev
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -55,6 +55,9 @@ jobs:
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Disable updater signing for CI build
+        run: python -c "import json,pathlib;p=pathlib.Path('src-tauri/tauri.conf.json');d=json.loads(p.read_text());d['bundle']['createUpdaterArtifacts']=False;d['plugins'].pop('updater',None);p.write_text(json.dumps(d,indent=2)+'\n')"
 
       - name: Build
         uses: tauri-apps/tauri-action@v0
