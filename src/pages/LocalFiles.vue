@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useI18n } from "vue-i18n";
-import type { LocalFolder, LocalLibrary, LocalVideo } from "@/types";
+import type { LocalFolder, LocalLibrary, LocalVideo, R2UploadProgress } from "@/types";
 import { useSettingStore } from "@/stores/setting";
 
 const { t } = useI18n();
@@ -16,7 +17,7 @@ const selectedFolderPath = ref("");
 const searchQuery = ref("");
 const isLoading = ref(false);
 const error = ref("");
-const uploading = ref<Record<string, boolean>>({});
+const uploading = ref<Record<string, R2UploadProgress>>({});
 
 const R2_URLS_STORAGE_KEY = "r2-uploaded-urls-v1";
 
@@ -85,7 +86,7 @@ const previewSource = (path: string) => convertFileSrc(path);
 const notifyError = (message: unknown) => {
   const value = String(message || t("localFiles.loadFailed"));
   error.value = value;
-  window.$message.error(value.startsWith("err_") ? t("localFiles.operationFailed") : value);
+  window.$message.error(value);
 };
 
 const loadLibrary = async (path = rootPath.value) => {
@@ -196,6 +197,22 @@ const deleteVideo = (video: LocalVideo) => {
   });
 };
 
+const formatUploadProgress = (progress: R2UploadProgress) => {
+  const speed = progress.speed > 0 ? ` · ${formatSize(progress.speed)}/s` : "";
+  const eta = progress.eta === null ? "" : ` · ${progress.eta}s`;
+  return `${Math.round(progress.percent)}%${speed}${eta}`;
+};
+
+const cancelUpload = async (video: LocalVideo) => {
+  const progress = uploading.value[video.path];
+  if (!progress) return;
+  try {
+    await invoke("cancel_r2_upload", { uploadId: progress.uploadId });
+  } catch (err) {
+    notifyError(err);
+  }
+};
+
 const uploadVideo = async (video: LocalVideo, folder: LocalFolder) => {
   if (uploadedUrls.value[video.path]) {
     await copyText(
@@ -205,9 +222,19 @@ const uploadVideo = async (video: LocalVideo, folder: LocalFolder) => {
     );
     return;
   }
-  uploading.value[video.path] = true;
+  const uploadId = crypto.randomUUID();
+  uploading.value[video.path] = {
+    uploadId,
+    filePath: video.path,
+    uploaded: 0,
+    total: video.size,
+    percent: 0,
+    speed: 0,
+    eta: null,
+  };
   try {
     const url = await invoke<string>("upload_local_video_to_r2", {
+      uploadId,
       filePath: video.path,
       objectKey: `${folder.name}/${video.name}`,
       accountId: settingStore.r2AccountId,
@@ -222,7 +249,7 @@ const uploadVideo = async (video: LocalVideo, folder: LocalFolder) => {
   } catch (err) {
     notifyError(err);
   } finally {
-    uploading.value[video.path] = false;
+    delete uploading.value[video.path];
   }
 };
 
@@ -263,8 +290,22 @@ watch(
   },
 );
 
+let stopR2Progress: (() => void) | undefined;
+
 onMounted(() => {
+  void listen<R2UploadProgress>("r2-upload-progress", (event) => {
+    const progress = event.payload;
+    if (uploading.value[progress.filePath]?.uploadId === progress.uploadId) {
+      uploading.value[progress.filePath] = progress;
+    }
+  }).then((unlisten) => {
+    stopR2Progress = unlisten;
+  });
   void loadLibrary();
+});
+
+onUnmounted(() => {
+  stopR2Progress?.();
 });
 </script>
 
@@ -386,7 +427,19 @@ onMounted(() => {
                 <n-text depth="3" class="video-meta">{{ formatSize(video.size) }} · {{ formatDate(video.modified) }}</n-text>
                 <n-flex :size="4" justify="end" align="center">
                   <n-tag v-if="uploadedUrls[video.path]" size="tiny" round type="success" :title="$t('localFiles.r2Available')">R2</n-tag>
-                  <n-button text size="tiny" :type="uploadedUrls[video.path] ? 'success' : 'primary'" :loading="uploading[video.path]" :title="uploadedUrls[video.path] ? $t('localFiles.copyR2Url') : $t('localFiles.uploadToR2')" @click="uploadVideo(video, selectedFolder)">
+                  <n-flex v-if="uploading[video.path]" :size="4" align="center" class="upload-progress">
+                    <n-progress
+                      type="line"
+                      :percentage="Math.round(uploading[video.path].percent)"
+                      :show-indicator="false"
+                      style="width: 72px"
+                    />
+                    <n-text depth="3" class="upload-progress-label">{{ formatUploadProgress(uploading[video.path]) }}</n-text>
+                    <n-button text size="tiny" type="warning" :title="$t('localFiles.cancelUpload')" @click="cancelUpload(video)">
+                      <template #icon><n-icon><icon-mdi-close /></n-icon></template>
+                    </n-button>
+                  </n-flex>
+                  <n-button v-else text size="tiny" :type="uploadedUrls[video.path] ? 'success' : 'primary'" :loading="Boolean(uploading[video.path])" :title="uploadedUrls[video.path] ? $t('localFiles.copyR2Url') : $t('localFiles.uploadToR2')" @click="uploadVideo(video, selectedFolder)">
                     <template #icon><n-icon><icon-simple-icons-cloudflare /></n-icon></template>
                   </n-button>
                   <n-button v-if="uploadedUrls[video.path]" text size="tiny" type="success" :title="$t('localFiles.copyR2Url')" @click="copyR2Url(video)">

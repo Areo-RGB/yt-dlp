@@ -55,7 +55,7 @@ export const useSettingStore = defineStore(
     const r2AccessKeyId = ref("");
     const r2SecretAccessKey = ref("");
     const r2Endpoint = ref("");
-    const r2Bucket = ref("");
+    const r2Bucket = ref("yt-dlp-gui-videos-20260906");
     const r2PublicBaseUrl = ref("");
 
     /** 文件名输出模板 */

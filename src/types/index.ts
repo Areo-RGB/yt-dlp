@@ -288,3 +288,32 @@ export interface LocalLibrary {
   root_path: string;
   folders: LocalFolder[];
 }
+
+export interface CloudVideo {
+  name: string;
+  key: string;
+  size: number;
+  modified: number | null;
+  url: string;
+}
+
+export interface CloudFolder {
+  name: string;
+  path: string;
+  videos: CloudVideo[];
+}
+
+export interface CloudLibrary {
+  bucket: string;
+  folders: CloudFolder[];
+}
+
+export interface R2UploadProgress {
+  uploadId: string;
+  filePath: string;
+  uploaded: number;
+  total: number;
+  percent: number;
+  speed: number;
+  eta: number | null;
+}

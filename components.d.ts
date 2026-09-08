@@ -29,6 +29,7 @@ declare module 'vue' {
     IconMdiClose: typeof import('~icons/mdi/close')['default']
     IconMdiCloseCircleOutline: typeof import('~icons/mdi/close-circle-outline')['default']
     IconMdiCloudCheck: typeof import('~icons/mdi/cloud-check')['default']
+    IconMdiCloudOutline: typeof import('~icons/mdi/cloud-outline')['default']
     IconMdiCog: typeof import('~icons/mdi/cog')['default']
     IconMdiCogOutline: typeof import('~icons/mdi/cog-outline')['default']
     IconMdiCommentTextMultipleOutline: typeof import('~icons/mdi/comment-text-multiple-outline')['default']

@@ -24,6 +24,11 @@ const router = createRouter({
       component: () => import("@/pages/LocalFiles.vue"),
     },
     {
+      path: "/cloud-files",
+      name: "cloud-files",
+      component: () => import("@/pages/CloudFiles.vue"),
+    },
+    {
       path: "/toolbox",
       component: () => import("@/pages/Toolbox.vue"),
       children: [

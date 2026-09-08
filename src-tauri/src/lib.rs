@@ -58,6 +58,7 @@ pub fn run() {
         .manage(app::commands::CliRequestState::new(initial_request))
         .manage(app::browser_bridge::BrowserBridgeState::default())
         .manage(commands::DownloadState::default())
+        .manage(commands::R2UploadState::default())
         .invoke_handler(tauri::generate_handler![
             app::commands::update_tray_menu,
             app::commands::reveal_browser_extension,
@@ -92,6 +93,10 @@ pub fn run() {
             commands::delete_local_folder,
             commands::split_video_chapters,
             commands::upload_local_video_to_r2,
+            commands::cancel_r2_upload,
+            commands::list_r2_videos,
+            commands::delete_r2_object,
+            commands::read_r2_env_file,
             commands::tool_download_thumbnail,
             commands::tool_fetch_thumbnails,
             commands::tool_save_thumbnail,
@@ -108,12 +113,7 @@ pub fn run() {
 
     #[cfg(debug_assertions)]
     {
-        builder = builder.plugin(tauri_plugin_mcp::init_with_config(
-            tauri_plugin_mcp::PluginConfig::new("YDL GUI".to_string())
-                .start_socket_server(true)
-                .allow_release_builds(false)
-                .default_webview_label("main".to_string()),
-        ));
+        builder = builder.plugin(tauri_plugin_mcp_bridge::init());
     }
 
     builder

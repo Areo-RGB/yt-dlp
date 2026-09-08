@@ -26,3 +26,6 @@ dist-ssr
 .test/*
 screenshot*
 .claude/
+.agents
+.ai
+.env

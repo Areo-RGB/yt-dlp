@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import { check } from "@tauri-apps/plugin-updater";
 import { useSettingStore } from "@/stores/setting";
 import { useStatusStore } from "@/stores/status";
@@ -10,6 +11,48 @@ const { t } = useI18n();
 const settingStore = useSettingStore();
 const statusStore = useStatusStore();
 const appVersion = ref("");
+
+const importR2Env = async () => {
+  try {
+    const selected = await open({
+      multiple: false,
+      directory: false,
+      title: t("settings.r2ImportEnv"),
+    });
+    if (typeof selected !== "string") return;
+
+    const content = await invoke<string>("read_r2_env_file", { path: selected });
+    const values: Record<string, string> = {};
+    for (const rawLine of content.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const match = line.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+      if (!match) continue;
+      let value = match[2].trim();
+      const quote = value[0];
+      if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
+        value = value.slice(1, -1);
+      }
+      values[match[1]] = value;
+    }
+
+    const valueFor = (...keys: string[]) => keys.map((key) => values[key]).find((value) => value !== undefined);
+    const setIfPresent = (keys: string[], setter: (value: string) => void) => {
+      const value = valueFor(...keys);
+      if (value !== undefined) setter(value);
+    };
+
+    setIfPresent(["R2_ACCOUNT_ID", "ACCOUNT_ID", "CLOUDFLARE_ACCOUNT_ID"], (value) => (settingStore.r2AccountId = value));
+    setIfPresent(["R2_ACCESS_KEY_ID", "ACCESS_KEY_ID"], (value) => (settingStore.r2AccessKeyId = value));
+    setIfPresent(["R2_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY"], (value) => (settingStore.r2SecretAccessKey = value));
+    setIfPresent(["R2_ENDPOINT", "S3_API_ENDPOINT"], (value) => (settingStore.r2Endpoint = value));
+    setIfPresent(["R2_BUCKET", "BUCKET"], (value) => (settingStore.r2Bucket = value));
+    setIfPresent(["R2_PUBLIC_BASE_URL", "PUBLIC_BASE_URL"], (value) => (settingStore.r2PublicBaseUrl = value));
+    window.$message.success(t("settings.r2Imported"));
+  } catch {
+    window.$message.error(t("settings.r2ImportFailed"));
+  }
+};
 
 const platform = ref("");
 const platformLabel = computed(() => {
@@ -132,6 +175,9 @@ watch(
     </n-card>
 
     <n-card :title="$t('settings.r2Title')" size="small" class="section-card">
+      <template #header-extra>
+        <n-button size="small" @click="importR2Env">{{ $t("settings.r2ImportEnv") }}</n-button>
+      </template>
       <n-flex vertical :size="10">
         <n-text depth="3" style="font-size: 13px">
           {{ $t("settings.r2Desc") }}

@@ -26,6 +26,6 @@
     "process:allow-restart",
     "process:allow-exit",
     "deep-link:default",
-    "mcp:default"
+    "mcp-bridge:default"
   ]
 }

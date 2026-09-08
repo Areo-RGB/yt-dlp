@@ -9,6 +9,7 @@ import IconMdiHome from "~icons/mdi/home";
 import IconMdiPlaylistPlay from "~icons/mdi/playlist-play";
 import IconMdiDownload from "~icons/mdi/download";
 import IconMdiFolder from "~icons/mdi/folder";
+import IconMdiCloud from "~icons/mdi/cloud";
 import IconMdiToolbox from "~icons/mdi/toolbox";
 import type { Component } from "vue";
 import type { BrowserExtensionImport, CliOpenRequest } from "@/types";
@@ -90,6 +91,7 @@ const navItems: { key: string; icon: Component; labelKey: string }[] = [
   { key: "pending", icon: IconMdiPlaylistPlay, labelKey: "nav.pending" },
   { key: "downloads", icon: IconMdiDownload, labelKey: "nav.downloads" },
   { key: "local-files", icon: IconMdiFolder, labelKey: "nav.localFiles" },
+  { key: "cloud-files", icon: IconMdiCloud, labelKey: "nav.cloudFiles" },
   { key: "toolbox", icon: IconMdiToolbox, labelKey: "nav.toolbox" },
 ];
 

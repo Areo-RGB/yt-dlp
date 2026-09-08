@@ -4,9 +4,8 @@
       "url": "http://localhost:15688/__mcp",
       "serverUrl": "http://localhost:15688/__mcp"
     },
-    "VueDocsMCP": {
-      "type": "http",
-      "url": "mcp.vue-mcp.org"
+    "tauri": {
+      "command": "./scripts/mcp-tauri-server.sh"
     }
   }
 }
