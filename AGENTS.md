@@ -52,6 +52,8 @@ tauri-mcp driver-session start --port 9223
 | Dev (Linux) | `./scripts/dev-linux.sh` or `pnpm run tauri:dev` |
 | Dev (generic) | `pnpm tauri dev` |
 | Build (Linux) | `./scripts/build-linux.sh` or `pnpm run tauri:build` |
+| Build (Windows) | `.\scripts\build-release.ps1` or `.\scripts\build.ps1` |
+| Build debug (Windows) | `.\scripts\build-debug.ps1` |
 | Build (generic) | `pnpm tauri build` |
 | Type-check | `pnpm typecheck` |
 | Lint | `pnpm lint` |
