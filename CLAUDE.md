@@ -1,20 +1,6 @@
 # CLAUDE.md
-https://deepwiki.com/tauri-apps/tauri
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-yt-dlp-gui is a desktop application for downloading videos via yt-dlp. Built with **Tauri 2** (Rust backend) + **Vue 3** (TypeScript frontend). The UI is in Chinese.
-
-## Development Commands
-
-```bash
-pnpm install          # Install frontend dependencies
-pnpm tauri dev        # Run the full app in development (starts Vite + Rust backend)
-pnpm dev              # Run frontend only (Vite dev server on port 5688)
-pnpm build            # Type-check and build frontend (vue-tsc + vite build)
-pnpm tauri build      # Build production app bundle
-```
+IMPORTANT: When applicable, prefer using intellij-index MCP tools for code navigation and refactoring.
 
 Rust backend builds are handled by Tauri automatically during `pnpm tauri dev` / `pnpm tauri build`. To check Rust code independently:
 ```bash
