@@ -1,6 +1,7 @@
-//! yt-dlp 输出解析模块
+//! yt-dlp 输出解析模块（优化版：基于借用切片与零堆分配字段清洗）
 
 /// 进度信息
+#[derive(Debug, Clone, PartialEq)]
 pub struct ProgressInfo {
     pub percent: f64,
     pub speed: String,
@@ -12,27 +13,125 @@ pub struct ProgressInfo {
     pub status: String,
 }
 
+/// 强类型借用切片反序列化结构体（避免 serde_json::Value 的 AST 树遍历与字符串堆分配）
+#[derive(serde::Deserialize)]
+struct RawProgress<'a> {
+    #[serde(default, borrow)]
+    percent: Option<&'a str>,
+    #[serde(default, borrow)]
+    speed: Option<&'a str>,
+    #[serde(default, borrow)]
+    eta: Option<&'a str>,
+    #[serde(default, borrow)]
+    downloaded: Option<&'a str>,
+    #[serde(default, borrow)]
+    total: Option<&'a str>,
+    #[serde(default, rename = "fragmentIndex", deserialize_with = "de_flex_u64")]
+    fragment_index: Option<u64>,
+    #[serde(default, rename = "fragmentCount", deserialize_with = "de_flex_u64")]
+    fragment_count: Option<u64>,
+    #[serde(default, borrow)]
+    status: Option<&'a str>,
+}
+
+/// 灵活解析 u64（兼容 JSON 整数如 14 与字符串整数如 "14"、空值、"NA"）
+fn de_flex_u64<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    struct FlexVisitor;
+    impl<'de> serde::de::Visitor<'de> for FlexVisitor {
+        type Value = Option<u64>;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("integer, string integer, or null")
+        }
+        fn visit_u64<E: serde::de::Error>(self, v: u64) -> Result<Self::Value, E> {
+            Ok(Some(v))
+        }
+        fn visit_i64<E: serde::de::Error>(self, v: i64) -> Result<Self::Value, E> {
+            Ok(if v >= 0 { Some(v as u64) } else { None })
+        }
+        fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+            let t = v.trim();
+            if t.is_empty() || t.eq_ignore_ascii_case("na") {
+                Ok(None)
+            } else {
+                Ok(t.parse::<u64>().ok())
+            }
+        }
+        fn visit_none<E: serde::de::Error>(self) -> Result<Self::Value, E> {
+            Ok(None)
+        }
+        fn visit_some<D2: serde::Deserializer<'de>>(self, d: D2) -> Result<Self::Value, D2::Error> {
+            d.deserialize_any(self)
+        }
+        fn visit_unit<E: serde::de::Error>(self) -> Result<Self::Value, E> {
+            Ok(None)
+        }
+    }
+    deserializer.deserialize_any(FlexVisitor)
+}
+
+/// 零堆分配大小写不敏感判断：检查字段是否包含 NA/Unknown 等无效占位符
+/// 相比原有实现避免了调用 .to_ascii_lowercase() 带来的堆分配
+#[inline]
+pub fn is_clean_invalid(s: &str) -> bool {
+    let t = s.trim();
+    if t.is_empty() {
+        return true;
+    }
+    if t.eq_ignore_ascii_case("na")
+        || t.eq_ignore_ascii_case("n/a")
+        || t.eq_ignore_ascii_case("none")
+        || t.eq_ignore_ascii_case("null")
+    {
+        return true;
+    }
+    if t.len() >= 7 && t.as_bytes().windows(7).any(|w| w.eq_ignore_ascii_case(b"unknown")) {
+        return true;
+    }
+    if t.len() >= 3 && t.as_bytes().windows(3).any(|w| w.eq_ignore_ascii_case(b"n/a")) {
+        return true;
+    }
+    false
+}
+
+/// 清理 yt-dlp 输出字段：移除 NA/Unknown 等无效值（零分配判断）
+#[inline]
+fn clean_field(s: Option<&str>) -> String {
+    match s {
+        Some(v) => {
+            let trimmed = v.trim();
+            if is_clean_invalid(trimmed) {
+                String::new()
+            } else {
+                trimmed.to_string()
+            }
+        }
+        None => String::new(),
+    }
+}
+
 /// 解析 --progress-template 输出的 JSON 进度行
 /// 格式: PROGRESS_JSON:{"percent":" 45.2%","speed":"2.50MiB/s","eta":"00:11","downloaded":"22.68MiB","total":"50.35MiB"}
 pub fn parse_progress_json(line: &str) -> Option<ProgressInfo> {
     let json_str = line.strip_prefix("PROGRESS_JSON:")?;
-    let v: serde_json::Value = serde_json::from_str(json_str).ok()?;
+    let raw: RawProgress = serde_json::from_str(json_str).ok()?;
 
-    // _percent_str 格式为 " 45.2%" 或 "100%"，去掉 % 和空格后解析为数字
-    let percent_str = v["percent"].as_str().unwrap_or("0%");
+    let percent_str = raw.percent.unwrap_or("0%");
     let percent: f64 = percent_str
         .trim()
         .trim_end_matches('%')
         .parse()
         .unwrap_or(0.0);
 
-    let speed = clean_field(v["speed"].as_str());
-    let eta = clean_field(v["eta"].as_str());
-    let downloaded = clean_field(v["downloaded"].as_str());
-    let total = clean_field(v["total"].as_str());
-    let fragment_index = v["fragmentIndex"].as_u64();
-    let fragment_count = v["fragmentCount"].as_u64();
-    let status = v["status"].as_str().unwrap_or("downloading").to_string();
+    let speed = clean_field(raw.speed);
+    let eta = clean_field(raw.eta);
+    let downloaded = clean_field(raw.downloaded);
+    let total = clean_field(raw.total);
+    let fragment_index = raw.fragment_index;
+    let fragment_count = raw.fragment_count;
+    let status = raw.status.unwrap_or("downloading").to_string();
 
     Some(ProgressInfo {
         percent,
@@ -80,26 +179,6 @@ pub fn parse_ffmpeg_speed(line: &str) -> String {
     String::new()
 }
 
-/// 清理 yt-dlp 输出字段：移除 NA/Unknown 等无效值
-fn clean_field(s: Option<&str>) -> String {
-    match s {
-        Some(v) => {
-            let trimmed = v.trim();
-            let normalized = trimmed.to_ascii_lowercase();
-            if normalized.is_empty()
-                || matches!(normalized.as_str(), "na" | "n/a" | "none" | "null")
-                || normalized.contains("unknown")
-                || normalized.contains("n/a")
-            {
-                String::new()
-            } else {
-                trimmed.to_string()
-            }
-        }
-        None => String::new(),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,6 +192,7 @@ mod tests {
         assert_eq!(info.eta, "00:11");
         assert_eq!(info.downloaded, "22.68MiB");
         assert_eq!(info.total, "50.35MiB");
+        assert_eq!(info.status, "downloading");
     }
 
     #[test]
@@ -147,6 +227,34 @@ mod tests {
     #[test]
     fn parse_progress_json_invalid_json_returns_none() {
         assert!(parse_progress_json("PROGRESS_JSON:{not valid json}").is_none());
+    }
+
+    #[test]
+    fn parse_progress_json_with_fragments() {
+        // 数字格式 fragment
+        let line1 = r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":12,"fragmentCount":24}"#;
+        let info1 = parse_progress_json(line1).unwrap();
+        assert_eq!(info1.fragment_index, Some(12));
+        assert_eq!(info1.fragment_count, Some(24));
+
+        // 字符串格式 fragment（yt-dlp 模板常见输出）
+        let line2 = r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"15","fragmentCount":"30"}"#;
+        let info2 = parse_progress_json(line2).unwrap();
+        assert_eq!(info2.fragment_index, Some(15));
+        assert_eq!(info2.fragment_count, Some(30));
+
+        // 无效值 "NA"
+        let line3 = r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"NA","fragmentCount":"NA"}"#;
+        let info3 = parse_progress_json(line3).unwrap();
+        assert_eq!(info3.fragment_index, None);
+        assert_eq!(info3.fragment_count, None);
+    }
+
+    #[test]
+    fn parse_progress_json_custom_status() {
+        let line = r#"PROGRESS_JSON:{"percent":"100%","status":"postprocessing"}"#;
+        let info = parse_progress_json(line).unwrap();
+        assert_eq!(info.status, "postprocessing");
     }
 
     #[test]
@@ -198,6 +306,8 @@ mod tests {
         assert!(clean_field(Some("NA")).is_empty());
         assert!(clean_field(Some("Unknown")).is_empty());
         assert!(clean_field(Some("N/A")).is_empty());
+        assert!(clean_field(Some("none")).is_empty());
+        assert!(clean_field(Some("null")).is_empty());
     }
 
     #[test]
@@ -221,5 +331,22 @@ mod tests {
     #[test]
     fn parse_ffmpeg_speed_no_field_returns_empty() {
         assert!(parse_ffmpeg_speed("some random line without speed field").is_empty());
+    }
+
+    #[test]
+    fn test_is_clean_invalid_checks() {
+        assert!(is_clean_invalid(""));
+        assert!(is_clean_invalid("   "));
+        assert!(is_clean_invalid("na"));
+        assert!(is_clean_invalid("NA"));
+        assert!(is_clean_invalid("N/A"));
+        assert!(is_clean_invalid("none"));
+        assert!(is_clean_invalid("NULL"));
+        assert!(is_clean_invalid("unknown"));
+        assert!(is_clean_invalid("Unknown"));
+        assert!(is_clean_invalid("Unknown B/s"));
+        assert!(is_clean_invalid("download N/A info"));
+        assert!(!is_clean_invalid("12.5 MiB/s"));
+        assert!(!is_clean_invalid("01:23"));
     }
 }
