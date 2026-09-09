@@ -24,6 +24,9 @@
 .PARAMETER NoBundle
     Skips installer bundling (equivalent to -Bundle none).
 
+.PARAMETER NoSign
+    Skips updater signing (passes --no-sign to Tauri build).
+
 .PARAMETER SkipTypecheck
     Skips the TypeScript / vue-tsc type-checking step.
 
@@ -39,6 +42,10 @@
 .EXAMPLE
     .\scripts\build-release.ps1
     Builds the standard production release with NSIS installer.
+
+.EXAMPLE
+    .\scripts\build-release.ps1 -NoSign
+    Builds release installer without requiring updater private key signing.
 
 .EXAMPLE
     .\scripts\build-release.ps1 -Bundle all -OpenOutput
@@ -59,6 +66,8 @@ param(
     [switch]$DebugBuild,
 
     [switch]$NoBundle,
+
+    [switch]$NoSign,
 
     [switch]$SkipTypecheck,
 
@@ -208,6 +217,67 @@ if ($NoBundle -or $Bundle -eq 'none') {
         default { $Bundle }
     }
     $tauriArgs += @('-b', $bundleArg)
+
+    # Handle updater artifact signing
+    if ($NoSign) {
+        $tauriArgs += '--no-sign'
+        Write-WarnMsg "Code signing disabled via -NoSign"
+    } else {
+        # Check if signing key is already set in environment
+        if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            # 1. Try loading from .env file in project root
+            $envFile = Join-Path $ProjectRoot ".env"
+            if (Test-Path -LiteralPath $envFile) {
+                Get-Content -LiteralPath $envFile | ForEach-Object {
+                    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$') {
+                        $keyName = $matches[1]
+                        $val = $matches[2].Trim("'`"")
+                        if (-not [Environment]::GetEnvironmentVariable($keyName, 'Process')) {
+                            [Environment]::SetEnvironmentVariable($keyName, $val, 'Process')
+                        }
+                    }
+                }
+            }
+        }
+
+        # 2. Try loading from standard local Tauri key locations (~/.tauri/yt-dlp-gui.key)
+        if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            $candidateKeys = @(
+                (Join-Path $HOME ".tauri\yt-dlp-gui.key"),
+                (Join-Path $HOME ".tauri\tauri.key")
+            )
+            $tauriDir = Join-Path $HOME ".tauri"
+            if (Test-Path -LiteralPath $tauriDir) {
+                $allKeys = Get-ChildItem -Path $tauriDir -Filter "*.key" -File -ErrorAction SilentlyContinue
+                foreach ($k in $allKeys) {
+                    if ($candidateKeys -notcontains $k.FullName) {
+                        $candidateKeys += $k.FullName
+                    }
+                }
+            }
+
+            foreach ($candidate in $candidateKeys) {
+                if (Test-Path -LiteralPath $candidate) {
+                    $env:TAURI_SIGNING_PRIVATE_KEY = Get-Content -LiteralPath $candidate -Raw
+                    if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD)) {
+                        $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ""
+                    }
+                    Write-Success "Auto-loaded local signing key from $candidate"
+                    break
+                }
+            }
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            if ($null -eq $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD) {
+                $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ""
+            }
+        } else {
+            Write-WarnMsg "TAURI_SIGNING_PRIVATE_KEY not found in environment or $HOME\.tauri."
+            Write-WarnMsg "If the build fails with a signing error, pass -NoSign or set TAURI_SIGNING_PRIVATE_KEY."
+            Write-WarnMsg "(Note: GitHub Repository Secrets only run in GitHub Actions CI, not local PowerShell.)"
+        }
+    }
 }
 
 if ($ExtraArgs) {

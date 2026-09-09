@@ -18,6 +18,8 @@ param(
 
     [switch]$NoBundle,
 
+    [switch]$NoSign,
+
     [switch]$SkipTypecheck,
 
     [switch]$SkipFrontend,
