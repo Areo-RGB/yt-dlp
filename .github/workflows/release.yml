@@ -59,7 +59,7 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
-      - name: Build & Publish Windows Tauri App
+      - name: Build & Publish Windows NSIS App
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +68,9 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'YDL GUI v__VERSION__'
-          releaseBody: 'Automatic release for YDL GUI v__VERSION__.'
+          releaseBody: 'Automatic Windows release for YDL GUI v__VERSION__.'
           releaseDraft: false
           prerelease: false
+          args: '--bundles nsis'
           includeUpdaterJson: true
+          updaterJsonPreferNsis: true
