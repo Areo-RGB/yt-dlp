@@ -1,5 +1,6 @@
 import { createI18n } from "vue-i18n";
 import enUS from "./en-US.json";
+import enUSComments from "./en-US-comments.json";
 
 // ==================== 语言注册表（新增语言只改这里 + 创建翻译文件） ====================
 
@@ -34,12 +35,18 @@ export const resolveLocale = (_locale: string): string => "en-US";
 
 const defaultLocale = "en-US";
 
+const enUSMessages = {
+  ...enUS,
+  settings: { ...enUS.settings, ...enUSComments.settings },
+  detail: { ...enUS.detail, ...enUSComments.detail },
+};
+
 const i18n = createI18n({
   legacy: false,
   locale: defaultLocale,
   fallbackLocale: "en-US",
   messages: {
-    "en-US": enUS,
+    "en-US": enUSMessages,
   },
 });
 

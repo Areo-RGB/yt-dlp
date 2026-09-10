@@ -37,6 +37,7 @@ export const createPendingItem = (data: FetchedVideoData, quick = false): Pendin
     recodeFormat: quick ? settingStore.quickRecodeFormat : "",
     limitRate: quick ? settingStore.quickLimitRate : "",
     ffmpegArgs: quick ? settingStore.quickFfmpegArgs : settingStore.defaultFfmpegArgs,
+    downloadTopComments: false,
     selectedSubtitles: [],
     liveFromStart:
       data.videoInfo.is_live === true || data.videoInfo.live_status === "is_live",

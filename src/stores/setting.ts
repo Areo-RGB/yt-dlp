@@ -97,6 +97,9 @@ export const useSettingStore = defineStore(
     /** YouTube visitor_data（与 PO Token 配套） */
     const youtubeVisitorData = ref("");
 
+    /** YouTube Data API credentials JSON（must contain an API key） */
+    const youtubeApiCredentialsFile = ref("");
+
     /** 在任务栏显示下载进度 */
     const showTaskbarProgress = ref(true);
 
@@ -142,6 +145,7 @@ export const useSettingStore = defineStore(
       ffmpegSource,
       youtubePoToken,
       youtubeVisitorData,
+      youtubeApiCredentialsFile,
       showTaskbarProgress,
     };
   },

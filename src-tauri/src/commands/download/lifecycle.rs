@@ -8,6 +8,7 @@ use tauri::{AppHandle, Manager};
 
 use super::{
     arguments::{build_download_args, requires_ffmpeg_merge},
+    comments::validate_credentials_path,
     model::{DownloadParams, DownloadProcessInfo, DownloadState},
     output::{spawn_completion_handler, spawn_output_reader},
 };
@@ -27,6 +28,15 @@ pub async fn start_download(
         && (!utils::get_ffmpeg_path(&app)?.exists() || !utils::get_ffprobe_path(&app)?.exists())
     {
         return Err("err_ffmpeg_required_for_merge".to_string());
+    }
+
+    if params.download_top_comments {
+        let credentials_file = params
+            .youtube_api_credentials_file
+            .as_deref()
+            .filter(|path| !path.trim().is_empty())
+            .ok_or("err_youtube_api_credentials_missing")?;
+        validate_credentials_path(credentials_file)?;
     }
 
     let args = build_download_args(&app, &params)?;

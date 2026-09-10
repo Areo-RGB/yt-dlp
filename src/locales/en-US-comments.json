@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "youtubeApiCredentials": "Service account / API key JSON",
+    "youtubeApiCredentialsPlaceholder": "Select a JSON file containing an API key",
+    "youtubeApiCredentialsSelect": "Choose JSON",
+    "youtubeApiCredentialsReady": "YouTube API credentials ready ({type})",
+    "youtubeApiCredentialsInvalid": "Invalid YouTube API credentials: {e}",
+    "youtubeApiCredentialsHint": "Top-comment downloads use YouTube Data API v3. Google does not support service-account identities for YouTube; the selected JSON must contain an API key such as api_key or youtube_api_key. A service-account JSON is accepted only if you add an API key field to it.",
+    "youtubeServiceAccountUnsupported": "Google service accounts cannot authenticate YouTube Data API calls. Add an API key field (api_key or youtube_api_key) to the JSON, or use a separate API-key JSON file.",
+    "youtubeApiKeyMissing": "No YouTube Data API key was found in that JSON file."
+  },
+  "detail": {
+    "downloadTopComments": "Download top 10 comments",
+    "downloadTopCommentsYoutubeOnly": "Available for YouTube video URLs only",
+    "youtubeApiCredentialsRequired": "Choose a YouTube API credentials JSON file in Settings first"
+  }
+}

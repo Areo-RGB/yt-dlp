@@ -78,4 +78,9 @@ pub struct DownloadParams {
     pub playlist_items: Option<String>,
     /// 从开始下载直播流（--live-from-start）
     pub live_from_start: bool,
+    /// 使用 YouTube Data API v3 下载相关度最高的 10 条评论。
+    #[serde(default)]
+    pub download_top_comments: bool,
+    /// 包含 YouTube API key 的 JSON 文件路径。
+    pub youtube_api_credentials_file: Option<String>,
 }

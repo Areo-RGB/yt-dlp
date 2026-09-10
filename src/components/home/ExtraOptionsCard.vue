@@ -9,6 +9,7 @@ const settingStore = useSettingStore();
 
 const props = defineProps<{
   videoInfo: VideoInfo;
+  sourceUrl?: string;
 }>();
 
 const startTime = defineModel<number | null>("startTime", {
@@ -40,11 +41,19 @@ const noMerge = defineModel<boolean>("noMerge", { required: true });
 const recodeFormat = defineModel<string>("recodeFormat", { required: true });
 const limitRate = defineModel<string>("limitRate", { required: true });
 const ffmpegArgs = defineModel<string>("ffmpegArgs", { required: true });
+const downloadTopComments = defineModel<boolean>("downloadTopComments", {
+  required: true,
+});
 
 /** 是否为正在直播 */
 const isLive = computed(
   () => props.videoInfo.is_live === true || props.videoInfo.live_status === "is_live",
 );
+
+const isYoutubeVideo = computed(() => {
+  const url = props.sourceUrl?.trim() || "";
+  return /(?:youtube\.com|youtu\.be)/i.test(url);
+});
 
 const outputTemplatePresets = computed(() => [
   { label: t("common.default"), value: DEFAULT_OUTPUT_TEMPLATE },
@@ -305,6 +314,18 @@ watch(endTime, (val) => {
         <n-checkbox v-model:checked="noMerge" size="small">
           {{ $t("detail.noMerge") }}
         </n-checkbox>
+        <n-tooltip :disabled="isYoutubeVideo" placement="top">
+          <template #trigger>
+            <n-checkbox
+              v-model:checked="downloadTopComments"
+              size="small"
+              :disabled="!isYoutubeVideo"
+            >
+              {{ $t("detail.downloadTopComments") }}
+            </n-checkbox>
+          </template>
+          {{ $t("detail.downloadTopCommentsYoutubeOnly") }}
+        </n-tooltip>
       </n-flex>
     </n-flex>
   </n-card>

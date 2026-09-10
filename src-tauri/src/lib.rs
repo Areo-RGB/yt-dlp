@@ -83,6 +83,8 @@ pub fn run() {
             commands::save_cookie_text,
             commands::fetch_video_info,
             commands::start_download,
+            commands::validate_youtube_api_credentials,
+            commands::download_youtube_top_comments,
             commands::pause_download,
             commands::resume_download,
             commands::cancel_download,

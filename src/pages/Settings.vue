@@ -12,6 +12,42 @@ const settingStore = useSettingStore();
 const statusStore = useStatusStore();
 const appVersion = ref("");
 
+interface YoutubeApiCredentialsInfo {
+  credentialType: string;
+  projectId: string | null;
+}
+
+const chooseYoutubeApiCredentials = async () => {
+  const selected = await open({
+    multiple: false,
+    directory: false,
+    title: t("settings.youtubeApiCredentialsSelect"),
+    filters: [{ name: "JSON", extensions: ["json"] }],
+  });
+  if (typeof selected !== "string") return;
+
+  try {
+    const info = await invoke<YoutubeApiCredentialsInfo>("validate_youtube_api_credentials", {
+      path: selected,
+    });
+    settingStore.youtubeApiCredentialsFile = selected;
+    window.$message.success(
+      t("settings.youtubeApiCredentialsReady", {
+        type: info.credentialType,
+      }),
+    );
+  } catch (e: unknown) {
+    const message = String(e);
+    if (message.includes("err_youtube_service_account_unsupported")) {
+      window.$message.error(t("settings.youtubeServiceAccountUnsupported"));
+    } else if (message.includes("err_youtube_api_key_missing")) {
+      window.$message.error(t("settings.youtubeApiKeyMissing"));
+    } else {
+      window.$message.error(t("settings.youtubeApiCredentialsInvalid", { e: message }));
+    }
+  }
+};
+
 const importR2Env = async () => {
   try {
     const selected = await open({
@@ -170,7 +206,27 @@ watch(
               style="flex: 1; max-width: 480px"
             />
           </div>
+          <div class="info-row">
+            <span class="info-label">{{ $t("settings.youtubeApiCredentials") }}</span>
+            <n-flex :size="6" align="center" :wrap="false" style="width: min(560px, 70vw)">
+              <n-input
+                :value="settingStore.youtubeApiCredentialsFile"
+                :placeholder="$t('settings.youtubeApiCredentialsPlaceholder')"
+                size="small"
+                readonly
+                clearable
+                style="flex: 1; min-width: 0"
+                @clear="settingStore.youtubeApiCredentialsFile = ''"
+              />
+              <n-button size="small" secondary @click="chooseYoutubeApiCredentials">
+                {{ $t("settings.youtubeApiCredentialsSelect") }}
+              </n-button>
+            </n-flex>
+          </div>
         </div>
+        <n-text depth="3" style="font-size: 12px">
+          {{ $t("settings.youtubeApiCredentialsHint") }}
+        </n-text>
       </n-flex>
     </n-card>
 

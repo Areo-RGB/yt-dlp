@@ -218,7 +218,9 @@ const handleDownload = async () => {
           v-model:recode-format="activeItem.recodeFormat"
           v-model:limit-rate="activeItem.limitRate"
           v-model:ffmpeg-args="activeItem.ffmpegArgs"
+          v-model:download-top-comments="activeItem.downloadTopComments"
           :video-info="activeItem.videoInfo as VideoInfo"
+          :source-url="activeItem.url"
           class="section-card"
         />
 

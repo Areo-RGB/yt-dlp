@@ -81,6 +81,7 @@ export interface ExtraOptions {
   recodeFormat: string;
   limitRate: string;
   ffmpegArgs: string;
+  downloadTopComments: boolean;
 }
 
 export interface DownloadTaskParams {
@@ -113,6 +114,10 @@ export interface DownloadTaskParams {
   playlistItems: string | null;
   /** 从开始下载直播流 */
   liveFromStart: boolean;
+  /** Download the top 10 YouTube comments through YouTube Data API v3. */
+  downloadTopComments: boolean;
+  /** JSON file containing an API key used for YouTube Data API calls. */
+  youtubeApiCredentialsFile: string | null;
 }
 
 export interface DownloadTask {
@@ -171,6 +176,7 @@ export interface PendingItem extends FetchedVideoData {
   recodeFormat: string;
   limitRate: string;
   ffmpegArgs: string;
+  downloadTopComments: boolean;
   selectedSubtitles: string[];
   /** 是否从开始下载直播流（--live-from-start） */
   liveFromStart: boolean;

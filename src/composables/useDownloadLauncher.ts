@@ -108,6 +108,8 @@ export const useDownloadLauncher = () => {
         noPlaylist: false,
         playlistItems: null,
         liveFromStart: false,
+        downloadTopComments: false,
+        youtubeApiCredentialsFile: null,
       },
     });
     return taskId;
@@ -127,6 +129,11 @@ export const useDownloadLauncher = () => {
     if (!settingStore.downloadDir) {
       window.$message.warning(t("detail.setDownloadDirFirst"));
       return "missing-directory";
+    }
+
+    if (item.downloadTopComments && !settingStore.youtubeApiCredentialsFile) {
+      window.$message.warning(t("detail.youtubeApiCredentialsRequired"));
+      return "failed";
     }
 
     const requiresFfmpegMerge =
@@ -182,6 +189,10 @@ export const useDownloadLauncher = () => {
       startTime: item.startTime != null ? timeToSeconds(item.startTime) : null,
       endTime: item.endTime != null ? timeToSeconds(item.endTime) : null,
       liveFromStart: item.liveFromStart,
+      downloadTopComments: item.downloadTopComments,
+      youtubeApiCredentialsFile: item.downloadTopComments
+        ? settingStore.youtubeApiCredentialsFile || null
+        : null,
       noPlaylist: item.isPlaylist && item.selectedPlaylistItems.length === 1,
       playlistItems:
         item.isPlaylist && item.selectedPlaylistItems.length > 0

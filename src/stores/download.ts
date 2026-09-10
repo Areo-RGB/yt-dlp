@@ -213,13 +213,32 @@ export const useDownloadStore = defineStore("download", () => {
       }
     });
 
-    await listen<{ id: string; outputFile: string }>("download-complete", (event) => {
+    await listen<{ id: string; outputFile: string }>("download-complete", async (event) => {
       const task = tasks.value.find((t) => t.id === event.payload.id);
       if (task) {
+        const outputFile = event.payload.outputFile;
+        if (outputFile) task.outputFile = outputFile;
+
+        if (task.params.downloadTopComments && outputFile) {
+          const credentialsFile = task.params.youtubeApiCredentialsFile;
+          if (credentialsFile) {
+            try {
+              const sidecar = await invoke<string>("download_youtube_top_comments", {
+                url: task.url,
+                credentialsFile,
+                outputFile,
+                downloadDir: task.params.downloadDir,
+              });
+              task.logs.push(`[comments] Saved top 10 comments: ${sidecar}`);
+            } catch (error: unknown) {
+              task.logs.push(`[comments] Failed to save comments: ${String(error)}`);
+            }
+          }
+        }
+
         task.status = "completed";
         task.percent = 100;
         task.speed = "";
-        if (event.payload.outputFile) task.outputFile = event.payload.outputFile;
         notify(
           i18n.global.t("downloads.notifyComplete"),
           task.title || i18n.global.t("downloads.notifyCompleteBody"),
