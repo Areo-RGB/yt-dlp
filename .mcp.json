@@ -1,8 +1,5 @@
 {
   "mcpServers": {
-    "vue-mcp": {
-      "url": "http://localhost:15688/__mcp"
-    },
     "tauri": {
       "command": "./scripts/mcp-tauri-server.sh"
     }
