@@ -45,8 +45,11 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.{vue,ts,js,scss,css,json}\"",
+    "check:setup": "./scripts/check-setup.sh",
     "sync:build": "./sync-build.sh",
-    "build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-release.ps1"
+    "build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-release.ps1",
+    "build:appimage": "./scripts/build-appimage.sh",
+    "build:zst": "./scripts/build-zst.sh"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.0",

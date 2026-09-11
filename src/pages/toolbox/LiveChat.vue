@@ -337,8 +337,8 @@ const handleSave = async () => {
                 :type="useRegex ? 'primary' : 'default'"
                 :secondary="useRegex"
                 :quaternary="!useRegex"
-                @click="useRegex = !useRegex"
                 style="font-family: monospace; font-weight: bold; width: 32px"
+                @click="useRegex = !useRegex"
               >
                 .*
               </n-button>

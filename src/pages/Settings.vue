@@ -72,18 +72,31 @@ const importR2Env = async () => {
       values[match[1]] = value;
     }
 
-    const valueFor = (...keys: string[]) => keys.map((key) => values[key]).find((value) => value !== undefined);
+    const valueFor = (...keys: string[]) =>
+      keys.map((key) => values[key]).find((value) => value !== undefined);
     const setIfPresent = (keys: string[], setter: (value: string) => void) => {
       const value = valueFor(...keys);
       if (value !== undefined) setter(value);
     };
 
-    setIfPresent(["R2_ACCOUNT_ID", "ACCOUNT_ID", "CLOUDFLARE_ACCOUNT_ID"], (value) => (settingStore.r2AccountId = value));
-    setIfPresent(["R2_ACCESS_KEY_ID", "ACCESS_KEY_ID"], (value) => (settingStore.r2AccessKeyId = value));
-    setIfPresent(["R2_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY"], (value) => (settingStore.r2SecretAccessKey = value));
+    setIfPresent(
+      ["R2_ACCOUNT_ID", "ACCOUNT_ID", "CLOUDFLARE_ACCOUNT_ID"],
+      (value) => (settingStore.r2AccountId = value),
+    );
+    setIfPresent(
+      ["R2_ACCESS_KEY_ID", "ACCESS_KEY_ID"],
+      (value) => (settingStore.r2AccessKeyId = value),
+    );
+    setIfPresent(
+      ["R2_SECRET_ACCESS_KEY", "SECRET_ACCESS_KEY"],
+      (value) => (settingStore.r2SecretAccessKey = value),
+    );
     setIfPresent(["R2_ENDPOINT", "S3_API_ENDPOINT"], (value) => (settingStore.r2Endpoint = value));
     setIfPresent(["R2_BUCKET", "BUCKET"], (value) => (settingStore.r2Bucket = value));
-    setIfPresent(["R2_PUBLIC_BASE_URL", "PUBLIC_BASE_URL"], (value) => (settingStore.r2PublicBaseUrl = value));
+    setIfPresent(
+      ["R2_PUBLIC_BASE_URL", "PUBLIC_BASE_URL"],
+      (value) => (settingStore.r2PublicBaseUrl = value),
+    );
     window.$message.success(t("settings.r2Imported"));
   } catch {
     window.$message.error(t("settings.r2ImportFailed"));
@@ -241,27 +254,65 @@ watch(
         <div class="info-list">
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2AccountId") }}</span>
-            <n-input v-model:value="settingStore.r2AccountId" size="small" clearable :placeholder="$t('settings.r2AccountIdPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2AccountId"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2AccountIdPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2AccessKeyId") }}</span>
-            <n-input v-model:value="settingStore.r2AccessKeyId" size="small" clearable :placeholder="$t('settings.r2AccessKeyIdPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2AccessKeyId"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2AccessKeyIdPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2SecretAccessKey") }}</span>
-            <n-input v-model:value="settingStore.r2SecretAccessKey" type="password" show-password-on="click" size="small" clearable :placeholder="$t('settings.r2SecretAccessKeyPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2SecretAccessKey"
+              type="password"
+              show-password-on="click"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2SecretAccessKeyPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2Endpoint") }}</span>
-            <n-input v-model:value="settingStore.r2Endpoint" size="small" clearable :placeholder="$t('settings.r2EndpointPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2Endpoint"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2EndpointPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2Bucket") }}</span>
-            <n-input v-model:value="settingStore.r2Bucket" size="small" clearable :placeholder="$t('settings.r2BucketPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2Bucket"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2BucketPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
           <div class="info-row">
             <span class="info-label">{{ $t("settings.r2PublicBaseUrl") }}</span>
-            <n-input v-model:value="settingStore.r2PublicBaseUrl" size="small" clearable :placeholder="$t('settings.r2PublicBaseUrlPlaceholder')" style="flex: 1; max-width: 480px" />
+            <n-input
+              v-model:value="settingStore.r2PublicBaseUrl"
+              size="small"
+              clearable
+              :placeholder="$t('settings.r2PublicBaseUrlPlaceholder')"
+              style="flex: 1; max-width: 480px"
+            />
           </div>
         </div>
       </n-flex>

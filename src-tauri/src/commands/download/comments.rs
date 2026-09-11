@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
-
 const COMMENT_THREADS_URL: &str = "https://www.googleapis.com/youtube/v3/commentThreads";
 const TOP_COMMENT_COUNT: usize = 10;
 
@@ -185,11 +184,7 @@ fn youtube_video_id(url: &str) -> Result<String, String> {
 
     for marker in ["youtu.be/", "/shorts/", "/embed/", "/live/"] {
         if let Some((_, rest)) = trimmed.split_once(marker) {
-            let id = rest
-                .split(['?', '&', '#', '/'])
-                .next()
-                .unwrap_or("")
-                .trim();
+            let id = rest.split(['?', '&', '#', '/']).next().unwrap_or("").trim();
             if !id.is_empty() {
                 return Ok(id.to_string());
             }
@@ -259,8 +254,8 @@ pub async fn download_youtube_top_comments(
         return Err(api_error_message(status, &body));
     }
 
-    let api_response: CommentThreadsResponse = serde_json::from_str(&body)
-        .map_err(|e| format!("err_youtube_comments_json:{}", e))?;
+    let api_response: CommentThreadsResponse =
+        serde_json::from_str(&body).map_err(|e| format!("err_youtube_comments_json:{}", e))?;
 
     let comments = api_response
         .items
@@ -274,7 +269,10 @@ pub async fn download_youtube_top_comments(
                 rank: index + 1,
                 id: thread.id,
                 author: snippet.author_display_name,
-                author_channel_id: snippet.author_channel_id.map(|id| id.value).unwrap_or_default(),
+                author_channel_id: snippet
+                    .author_channel_id
+                    .map(|id| id.value)
+                    .unwrap_or_default(),
                 text: snippet.text_original,
                 like_count: snippet.like_count,
                 published_at: snippet.published_at,

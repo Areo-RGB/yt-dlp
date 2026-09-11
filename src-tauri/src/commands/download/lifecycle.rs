@@ -1,8 +1,8 @@
 //! 下载子进程的创建与生命周期启动。
 
-use crate::utils;
 #[cfg(target_os = "windows")]
 use crate::commands::CREATE_NO_WINDOW;
+use crate::utils;
 use std::process::Stdio;
 use tauri::{AppHandle, Manager};
 

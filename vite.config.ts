@@ -8,6 +8,8 @@ import Components from "unplugin-vue-components/vite";
 import Icons from "unplugin-icons/vite";
 import IconsResolver from "unplugin-icons/resolver";
 
+const host = process.env.TAURI_DEV_HOST;
+
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [
@@ -40,12 +42,25 @@ export default defineConfig(async () => ({
       "@": resolve(__dirname, "src"),
     },
   },
+  // Prevent Vite from obscuring Rust/Tauri CLI compiler logs
   clearScreen: false,
   server: {
     port: 15688,
+    // Tauri expects a fixed port matching devUrl in tauri.conf.json
     strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+          protocol: "ws",
+          host,
+          port: 15689,
+        }
+      : undefined,
     watch: {
+      // Tell Vite to ignore watching src-tauri
       ignored: ["**/src-tauri/**"],
     },
   },
+  // Expose both VITE_ and TAURI_ENV_ prefixed variables to the frontend
+  envPrefix: ["VITE_", "TAURI_ENV_*"],
 }));

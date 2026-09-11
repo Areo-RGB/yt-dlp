@@ -15,8 +15,8 @@
         <n-notification-provider>
           <n-message-provider :max="1" placement="bottom">
             <n-modal-provider>
-              <slot />
               <NaiveProviderContent />
+              <slot />
             </n-modal-provider>
           </n-message-provider>
         </n-notification-provider>

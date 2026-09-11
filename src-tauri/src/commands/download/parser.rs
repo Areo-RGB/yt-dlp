@@ -87,10 +87,18 @@ pub fn is_clean_invalid(s: &str) -> bool {
     {
         return true;
     }
-    if t.len() >= 7 && t.as_bytes().windows(7).any(|w| w.eq_ignore_ascii_case(b"unknown")) {
+    if t.len() >= 7
+        && t.as_bytes()
+            .windows(7)
+            .any(|w| w.eq_ignore_ascii_case(b"unknown"))
+    {
         return true;
     }
-    if t.len() >= 3 && t.as_bytes().windows(3).any(|w| w.eq_ignore_ascii_case(b"n/a")) {
+    if t.len() >= 3
+        && t.as_bytes()
+            .windows(3)
+            .any(|w| w.eq_ignore_ascii_case(b"n/a"))
+    {
         return true;
     }
     false
@@ -238,13 +246,15 @@ mod tests {
         assert_eq!(info1.fragment_count, Some(24));
 
         // 字符串格式 fragment（yt-dlp 模板常见输出）
-        let line2 = r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"15","fragmentCount":"30"}"#;
+        let line2 =
+            r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"15","fragmentCount":"30"}"#;
         let info2 = parse_progress_json(line2).unwrap();
         assert_eq!(info2.fragment_index, Some(15));
         assert_eq!(info2.fragment_count, Some(30));
 
         // 无效值 "NA"
-        let line3 = r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"NA","fragmentCount":"NA"}"#;
+        let line3 =
+            r#"PROGRESS_JSON:{"percent":"50.0%","fragmentIndex":"NA","fragmentCount":"NA"}"#;
         let info3 = parse_progress_json(line3).unwrap();
         assert_eq!(info3.fragment_index, None);
         assert_eq!(info3.fragment_count, None);
@@ -324,7 +334,8 @@ mod tests {
 
     #[test]
     fn parse_ffmpeg_speed_na_returns_empty() {
-        let line = "frame=    0 fps=0.0 q=0.0 size=       0kB time=00:00:00.00 bitrate=N/A speed=N/A";
+        let line =
+            "frame=    0 fps=0.0 q=0.0 size=       0kB time=00:00:00.00 bitrate=N/A speed=N/A";
         assert!(parse_ffmpeg_speed(line).is_empty());
     }
 

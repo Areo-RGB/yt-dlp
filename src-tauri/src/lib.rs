@@ -7,6 +7,18 @@ mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    {
+        // Workaround for WebKitGTK DMA-BUF renderer crash on Wayland (Error 71 Protokollfehler)
+        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+        // Workaround for NVIDIA explicit sync protocol violations under Wayland
+        if std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
+            std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
+        }
+    }
+
     let initial_cli = app::cli::parse_cli_args(
         std::env::args_os().map(|argument| argument.to_string_lossy().to_string()),
     );
@@ -18,7 +30,7 @@ pub fn run() {
     }
     let initial_request = (!initial_cli.request.is_empty()).then_some(initial_cli.request);
 
-    let mut builder = tauri::Builder::default()
+    let builder = tauri::Builder::default()
         // 必须最先注册，确保协议唤醒产生的第二实例参数不会被其他插件抢先处理。
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             let cli_options = app::cli::parse_cli_args(args.iter().cloned());
@@ -114,9 +126,7 @@ pub fn run() {
         ]);
 
     #[cfg(debug_assertions)]
-    {
-        builder = builder.plugin(tauri_plugin_mcp_bridge::init());
-    }
+    let builder = builder.plugin(tauri_plugin_mcp_bridge::init());
 
     builder
         .run(tauri::generate_context!())

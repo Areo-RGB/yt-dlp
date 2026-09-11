@@ -55,11 +55,7 @@ const limitRateOptions = [
             </n-radio-group>
           </n-flex>
 
-          <n-flex
-            v-if="settingStore.quickDownloadMode !== 'audio'"
-            align="center"
-            :size="8"
-          >
+          <n-flex v-if="settingStore.quickDownloadMode !== 'audio'" align="center" :size="8">
             <span class="option-label">{{ $t("home.maxQuality") }}</span>
             <n-select
               v-model:value="settingStore.quickMaxHeight"

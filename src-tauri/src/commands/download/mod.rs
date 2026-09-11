@@ -9,6 +9,7 @@ mod model;
 mod output;
 mod parser;
 
+pub use comments::*;
 pub use control::*;
 pub use comments::{download_youtube_top_comments, validate_youtube_api_credentials};
 pub use files::*;

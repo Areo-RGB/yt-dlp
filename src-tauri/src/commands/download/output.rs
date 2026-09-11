@@ -209,10 +209,7 @@ fn process_output_line(
     }
 
     // 4. 转发日志到前端（不含进度 JSON 行，保持日志清晰）
-    let payload = LogEventPayload {
-        id: task_id,
-        line,
-    };
+    let payload = LogEventPayload { id: task_id, line };
     let _ = app.emit("download-log", &payload);
 }
 
@@ -290,7 +287,8 @@ pub(super) fn spawn_output_reader<R: tokio::io::AsyncRead + Unpin + Send + 'stat
                     while start < n {
                         let slice = &chunk_buf[start..n];
                         // 切片扫描 \n 或 \r 分隔符
-                        let delimiter_rel_idx = slice.iter().position(|&b| b == b'\n' || b == b'\r');
+                        let delimiter_rel_idx =
+                            slice.iter().position(|&b| b == b'\n' || b == b'\r');
 
                         match delimiter_rel_idx {
                             Some(rel_idx) => {
@@ -302,7 +300,8 @@ pub(super) fn spawn_output_reader<R: tokio::io::AsyncRead + Unpin + Send + 'stat
                                 }
 
                                 if !line_buf.is_empty() {
-                                    let line = String::from_utf8_lossy(&line_buf).trim().to_string();
+                                    let line =
+                                        String::from_utf8_lossy(&line_buf).trim().to_string();
                                     if !line.is_empty() {
                                         process_output_line(
                                             &app,

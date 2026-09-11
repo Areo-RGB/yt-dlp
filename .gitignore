@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-/home/paul/yt-dlp-gui/.serena*
+.serena*
 node_modules
 dist
 dist-ssr
@@ -16,6 +16,13 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+.idea/httpRequests/
+.idea/dataSources.local.xml
+*.iml
 .DS_Store
 *.suo
 *.ntvs*
@@ -30,3 +37,19 @@ screenshot*
 .ai
 .env
 convert_1fps_nvenc.py
+/.claude/
+/.copilot/
+Thumbs.db
+desktop.ini
+out/
+
+# Tooling & Compiler Cache
+.eslintcache
+.prettiercache
+*.tsbuildinfo
+
+# Python Virtual Environments & Cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]

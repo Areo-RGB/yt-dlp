@@ -8,7 +8,7 @@ use super::model::DownloadParams;
 const DEFAULT_OUTPUT_TEMPLATE: &str = "%(title).200s.%(ext)s";
 const EMOJI_PATTERN: &str = concat!(
     r"[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF",
-    r"⌀-⏿☀-➿⭐⭕〰〽㊗㊙️‍⃣]",
+    r"\u2300-\u23ff\u2600-\u27bf\u2b50\u2b55\u3030\u303d\u3297\u3299\ufe0f\u200d\u20e3]",
 );
 
 fn build_output_template(download_dir: &str, template: Option<&str>) -> String {
@@ -166,6 +166,9 @@ pub(super) fn build_download_args(
     }
     if params.embed_thumbnail {
         args.push("--embed-thumbnail".to_string());
+        args.push("--write-thumbnail".to_string());
+        args.push("--convert-thumbnails".to_string());
+        args.push("jpg".to_string());
     }
     if params.embed_metadata {
         args.push("--embed-metadata".to_string());
@@ -359,6 +362,8 @@ mod ffmpeg_requirement_tests {
             no_playlist: false,
             playlist_items: None,
             live_from_start: false,
+            download_top_comments: false,
+            youtube_api_credentials_file: None,
         }
     }
 

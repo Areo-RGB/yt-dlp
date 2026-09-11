@@ -24,9 +24,7 @@ const formatTime = (seconds: number): string => {
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
   const pad = (value: number) => String(value).padStart(2, "0");
-  return hours > 0
-    ? `${pad(hours)}:${pad(minutes)}:${pad(secs)}`
-    : `${pad(minutes)}:${pad(secs)}`;
+  return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(secs)}` : `${pad(minutes)}:${pad(secs)}`;
 };
 
 export const useDownloadLauncher = () => {
@@ -54,10 +52,8 @@ export const useDownloadLauncher = () => {
     }
 
     if (item.startTime != null || item.endTime != null) {
-      const start =
-        item.startTime != null ? formatTime(timeToSeconds(item.startTime)) : "00:00";
-      const end =
-        item.endTime != null ? formatTime(timeToSeconds(item.endTime)) : t("detail.end");
+      const start = item.startTime != null ? formatTime(timeToSeconds(item.startTime)) : "00:00";
+      const end = item.endTime != null ? formatTime(timeToSeconds(item.endTime)) : t("detail.end");
       parts.push(`✂${start}-${end}`);
     }
     return parts.join(" ") || t("detail.defaultQuality");
@@ -222,7 +218,9 @@ export const useDownloadLauncher = () => {
     };
 
     if (preparingTaskId) {
-      const preparingTask = downloadStore.tasks.find((candidate) => candidate.id === preparingTaskId);
+      const preparingTask = downloadStore.tasks.find(
+        (candidate) => candidate.id === preparingTaskId,
+      );
       if (!preparingTask || preparingTask.status !== "preparing") return "failed";
       Object.assign(preparingTask, task);
     } else {
@@ -243,7 +241,9 @@ export const useDownloadLauncher = () => {
         if (failedTask) {
           failedTask.status = "error";
           failedTask.error =
-            error instanceof Error ? error.message : String(error) || t("detail.startDownloadFailed");
+            error instanceof Error
+              ? error.message
+              : String(error) || t("detail.startDownloadFailed");
         }
       } else {
         downloadStore.removeTask(taskId);

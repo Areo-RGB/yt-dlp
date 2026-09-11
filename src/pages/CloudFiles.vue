@@ -34,9 +34,9 @@ const r2Config = computed(() => {
 const credentialsReady = computed(() =>
   Boolean(
     r2Config.value.accountId &&
-      r2Config.value.accessKeyId &&
-      r2Config.value.secretAccessKey &&
-      r2Config.value.endpoint,
+    r2Config.value.accessKeyId &&
+    r2Config.value.secretAccessKey &&
+    r2Config.value.endpoint,
   ),
 );
 
@@ -164,7 +164,9 @@ onMounted(() => {
         </div>
         <n-flex align="center" :size="8" wrap>
           <n-button size="small" :loading="isLoading" @click="loadLibrary">
-            <template #icon><n-icon><icon-mdi-refresh /></n-icon></template>
+            <template #icon>
+              <n-icon><icon-mdi-refresh /></n-icon>
+            </template>
             {{ $t("common.refresh") }}
           </n-button>
         </n-flex>
@@ -179,11 +181,21 @@ onMounted(() => {
 
       <div class="root-row">
         <n-icon size="18"><icon-mdi-cloud-outline /></n-icon>
-        <n-text depth="3" class="root-path">{{ r2Config.bucket }}
-          <span class="endpoint-label">· {{ r2Config.publicBaseUrl || $t("cloudFiles.privateSignedUrls") }}</span>
+        <n-text depth="3" class="root-path">
+          {{ r2Config.bucket }}
+          <span class="endpoint-label">
+            · {{ r2Config.publicBaseUrl || $t("cloudFiles.privateSignedUrls") }}
+          </span>
         </n-text>
-        <n-button text size="tiny" :disabled="!r2Config.publicBaseUrl" @click="copyUrl(r2Config.publicBaseUrl)">
-          <template #icon><n-icon><icon-mdi-content-copy /></n-icon></template>
+        <n-button
+          text
+          size="tiny"
+          :disabled="!r2Config.publicBaseUrl"
+          @click="copyUrl(r2Config.publicBaseUrl)"
+        >
+          <template #icon>
+            <n-icon><icon-mdi-content-copy /></n-icon>
+          </template>
         </n-button>
       </div>
 
@@ -192,11 +204,22 @@ onMounted(() => {
           <template #header-extra>
             <n-tag size="small" round>{{ folders.length }}</n-tag>
           </template>
-          <n-input v-model:value="searchQuery" clearable size="small" :placeholder="$t('cloudFiles.searchFolders')">
-            <template #prefix><n-icon><icon-mdi-magnify /></n-icon></template>
+          <n-input
+            v-model:value="searchQuery"
+            clearable
+            size="small"
+            :placeholder="$t('cloudFiles.searchFolders')"
+          >
+            <template #prefix>
+              <n-icon><icon-mdi-magnify /></n-icon>
+            </template>
           </n-input>
           <n-scrollbar class="folder-list">
-            <n-empty v-if="!isLoading && filteredFolders.length === 0" size="small" :description="$t('cloudFiles.noFolders')" />
+            <n-empty
+              v-if="!isLoading && filteredFolders.length === 0"
+              size="small"
+              :description="$t('cloudFiles.noFolders')"
+            />
             <n-skeleton v-else-if="isLoading" text :repeat="5" />
             <n-flex v-else vertical :size="4">
               <n-button
@@ -209,7 +232,9 @@ onMounted(() => {
                 justify="start"
                 @click="selectedFolderPath = folder.path"
               >
-                <template #icon><n-icon><icon-mdi-folder /></n-icon></template>
+                <template #icon>
+                  <n-icon><icon-mdi-folder /></n-icon>
+                </template>
                 <span class="folder-name">{{ folder.name }}</span>
                 <n-tag size="tiny" round>{{ folder.videos.length }}</n-tag>
               </n-button>
@@ -226,36 +251,89 @@ onMounted(() => {
             </n-flex>
           </template>
           <template #header-extra>
-            <n-button text size="small" type="error" :disabled="selectedFolder.videos.length === 0" @click="deleteFolder(selectedFolder)">
-              <template #icon><n-icon><icon-mdi-delete-outline /></n-icon></template>
+            <n-button
+              text
+              size="small"
+              type="error"
+              :disabled="selectedFolder.videos.length === 0"
+              @click="deleteFolder(selectedFolder)"
+            >
+              <template #icon>
+                <n-icon><icon-mdi-delete-outline /></n-icon>
+              </template>
             </n-button>
           </template>
 
-          <n-empty v-if="selectedFolder.videos.length === 0" :description="$t('cloudFiles.noVideos')" />
+          <n-empty
+            v-if="selectedFolder.videos.length === 0"
+            :description="$t('cloudFiles.noVideos')"
+          />
           <div v-else class="video-grid">
-            <n-card v-for="video in selectedFolder.videos" :key="video.key" size="small" class="video-card" content-style="padding: 0">
+            <n-card
+              v-for="video in selectedFolder.videos"
+              :key="video.key"
+              size="small"
+              class="video-card"
+              content-style="padding: 0"
+            >
               <div class="video-cover" @click="openVideo(video)">
-                <video class="video-preview" :src="video.url" preload="metadata" muted playsinline />
-                <div class="play-overlay"><n-icon size="30"><icon-mdi-play /></n-icon></div>
-                <div class="cloud-badge" :title="$t('cloudFiles.openVideo')" @click.stop="openVideo(video)">
+                <video
+                  class="video-preview"
+                  :src="video.url"
+                  preload="metadata"
+                  muted
+                  playsinline
+                />
+                <div class="play-overlay">
+                  <n-icon size="30"><icon-mdi-play /></n-icon>
+                </div>
+                <div
+                  class="cloud-badge"
+                  :title="$t('cloudFiles.openVideo')"
+                  @click.stop="openVideo(video)"
+                >
                   <n-icon size="13"><icon-mdi-cloud-check /></n-icon>
                   <span>R2</span>
                 </div>
               </div>
               <div class="video-info">
-                <n-ellipsis :line-clamp="2" :tooltip="false">{{ video.name }}
-                </n-ellipsis>
-                <n-text depth="3" class="video-meta">{{ formatSize(video.size) }} · {{ formatDate(video.modified) }}
+                <n-ellipsis :line-clamp="2" :tooltip="false">{{ video.name }}</n-ellipsis>
+                <n-text depth="3" class="video-meta">
+                  {{ formatSize(video.size) }} · {{ formatDate(video.modified) }}
                 </n-text>
                 <n-flex :size="4" justify="end" align="center">
-                  <n-button text size="tiny" type="primary" :title="$t('cloudFiles.openVideo')" @click="openVideo(video)">
-                    <template #icon><n-icon><icon-mdi-open-in-new /></n-icon></template>
+                  <n-button
+                    text
+                    size="tiny"
+                    type="primary"
+                    :title="$t('cloudFiles.openVideo')"
+                    @click="openVideo(video)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-mdi-open-in-new /></n-icon>
+                    </template>
                   </n-button>
-                  <n-button text size="tiny" type="success" :title="$t('cloudFiles.copyUrl')" @click="copyUrl(video.url)">
-                    <template #icon><n-icon><icon-mdi-link-variant /></n-icon></template>
+                  <n-button
+                    text
+                    size="tiny"
+                    type="success"
+                    :title="$t('cloudFiles.copyUrl')"
+                    @click="copyUrl(video.url)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-mdi-link-variant /></n-icon>
+                    </template>
                   </n-button>
-                  <n-button text size="tiny" type="error" :title="$t('common.remove')" @click="deleteVideo(video)">
-                    <template #icon><n-icon><icon-mdi-delete-outline /></n-icon></template>
+                  <n-button
+                    text
+                    size="tiny"
+                    type="error"
+                    :title="$t('common.remove')"
+                    @click="deleteVideo(video)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-mdi-delete-outline /></n-icon>
+                    </template>
                   </n-button>
                 </n-flex>
               </div>

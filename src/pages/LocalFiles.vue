@@ -11,7 +11,7 @@ import { useSettingStore } from "@/stores/setting";
 const { t } = useI18n();
 const settingStore = useSettingStore();
 
-const rootPath = ref(settingStore.downloadDir);
+const rootPath = ref(typeof settingStore.downloadDir === "string" ? settingStore.downloadDir : "");
 const folders = ref<LocalFolder[]>([]);
 const selectedFolderPath = ref("");
 const searchQuery = ref("");
@@ -86,11 +86,16 @@ const previewSource = (path: string) => convertFileSrc(path);
 const notifyError = (message: unknown) => {
   const value = String(message || t("localFiles.loadFailed"));
   error.value = value;
-  window.$message.error(value);
+  // The page can mount before provider APIs are initialized when an initial
+  // directory scan fails. Keep the error visible without throwing again.
+  window.$message?.error(value);
 };
 
 const loadLibrary = async (path = rootPath.value) => {
-  const normalized = path.trim();
+  // Persisted Pinia state may contain a value from an older version or a
+  // manually edited localStorage entry. Treat non-string values as unset so
+  // an unreachable/malformed configured directory cannot break this route.
+  const normalized = typeof path === "string" ? path.trim() : "";
   if (!normalized) {
     folders.value = [];
     selectedFolderPath.value = "";
@@ -123,8 +128,8 @@ const chooseRoot = async () => {
       multiple: false,
       title: t("localFiles.chooseRoot"),
     });
-    if (!selected) return;
-    rootPath.value = selected as string;
+    if (typeof selected !== "string" || !selected.trim()) return;
+    rootPath.value = selected;
     await loadLibrary();
   } catch (err) {
     notifyError(err);
@@ -283,7 +288,7 @@ const deleteFolder = (folder: LocalFolder) => {
 watch(
   () => settingStore.downloadDir,
   (value) => {
-    if (!rootPath.value && value) {
+    if (!rootPath.value && typeof value === "string" && value.trim()) {
       rootPath.value = value;
       void loadLibrary(value);
     }
@@ -319,11 +324,15 @@ onUnmounted(() => {
         </div>
         <n-flex align="center" :size="8" wrap>
           <n-button size="small" :loading="isLoading" @click="loadLibrary()">
-            <template #icon><n-icon><icon-mdi-refresh /></n-icon></template>
+            <template #icon>
+              <n-icon><icon-mdi-refresh /></n-icon>
+            </template>
             {{ $t("common.refresh") }}
           </n-button>
           <n-button type="primary" size="small" @click="chooseRoot">
-            <template #icon><n-icon><icon-mdi-folder-open-outline /></n-icon></template>
+            <template #icon>
+              <n-icon><icon-mdi-folder-open-outline /></n-icon>
+            </template>
             {{ $t("localFiles.chooseRoot") }}
           </n-button>
         </n-flex>
@@ -340,7 +349,9 @@ onUnmounted(() => {
         <n-icon size="18"><icon-mdi-folder-outline /></n-icon>
         <n-text depth="3" class="root-path">{{ rootPath || $t("localFiles.notSet") }}</n-text>
         <n-button v-if="rootPath" text size="tiny" @click="copyPath(rootPath)">
-          <template #icon><n-icon><icon-mdi-content-copy /></n-icon></template>
+          <template #icon>
+            <n-icon><icon-mdi-content-copy /></n-icon>
+          </template>
         </n-button>
       </div>
 
@@ -349,11 +360,22 @@ onUnmounted(() => {
           <template #header-extra>
             <n-tag size="small" round>{{ folders.length }}</n-tag>
           </template>
-          <n-input v-model:value="searchQuery" clearable size="small" :placeholder="$t('localFiles.searchFolders')">
-            <template #prefix><n-icon><icon-mdi-magnify /></n-icon></template>
+          <n-input
+            v-model:value="searchQuery"
+            clearable
+            size="small"
+            :placeholder="$t('localFiles.searchFolders')"
+          >
+            <template #prefix>
+              <n-icon><icon-mdi-magnify /></n-icon>
+            </template>
           </n-input>
           <n-scrollbar class="folder-list">
-            <n-empty v-if="!isLoading && filteredFolders.length === 0" size="small" :description="$t('localFiles.noFolders')" />
+            <n-empty
+              v-if="!isLoading && filteredFolders.length === 0"
+              size="small"
+              :description="$t('localFiles.noFolders')"
+            />
             <n-skeleton v-else-if="isLoading" text :repeat="5" />
             <n-flex v-else vertical :size="4">
               <n-button
@@ -366,7 +388,9 @@ onUnmounted(() => {
                 justify="start"
                 @click="selectedFolderPath = folder.path"
               >
-                <template #icon><n-icon><icon-mdi-folder /></n-icon></template>
+                <template #icon>
+                  <n-icon><icon-mdi-folder /></n-icon>
+                </template>
                 <span class="folder-name">{{ folder.name }}</span>
                 <n-tag size="tiny" round>{{ folder.videos.length }}</n-tag>
               </n-button>
@@ -384,37 +408,87 @@ onUnmounted(() => {
           </template>
           <template #header-extra>
             <n-flex :size="4" align="center">
-              <n-tag v-if="selectedFolder.videos.some((video) => uploadedUrls[video.path])" size="small" round type="success" :title="$t('localFiles.r2Available')">
-                R2 {{ selectedFolder.videos.filter((video) => uploadedUrls[video.path]).length }}/{{ selectedFolder.videos.length }}
+              <n-tag
+                v-if="selectedFolder.videos.some((video) => uploadedUrls[video.path])"
+                size="small"
+                round
+                type="success"
+                :title="$t('localFiles.r2Available')"
+              >
+                R2 {{ selectedFolder.videos.filter((video) => uploadedUrls[video.path]).length }}/{{
+                  selectedFolder.videos.length
+                }}
               </n-tag>
-              <n-button text size="small" type="primary" :title="$t('localFiles.uploadToR2')" :loading="selectedFolder.videos.some((video) => uploading[video.path])" :disabled="selectedFolder.videos.length === 0" @click="uploadFolder(selectedFolder)">
-                <template #icon><n-icon><icon-simple-icons-cloudflare /></n-icon></template>
+              <n-button
+                text
+                size="small"
+                type="primary"
+                :title="$t('localFiles.uploadToR2')"
+                :loading="selectedFolder.videos.some((video) => uploading[video.path])"
+                :disabled="selectedFolder.videos.length === 0"
+                @click="uploadFolder(selectedFolder)"
+              >
+                <template #icon>
+                  <n-icon><icon-simple-icons-cloudflare /></n-icon>
+                </template>
               </n-button>
               <n-button text size="small" @click="openFolder(selectedFolder)">
-                <template #icon><n-icon><icon-mdi-folder-open-outline /></n-icon></template>
+                <template #icon>
+                  <n-icon><icon-mdi-folder-open-outline /></n-icon>
+                </template>
               </n-button>
-              <n-button v-if="selectedFolder.path !== rootPath" text size="small" type="error" @click="deleteFolder(selectedFolder)">
-                <template #icon><n-icon><icon-mdi-delete-outline /></n-icon></template>
+              <n-button
+                v-if="selectedFolder.path !== rootPath"
+                text
+                size="small"
+                type="error"
+                @click="deleteFolder(selectedFolder)"
+              >
+                <template #icon>
+                  <n-icon><icon-mdi-delete-outline /></n-icon>
+                </template>
               </n-button>
             </n-flex>
           </template>
 
-          <n-empty v-if="selectedFolder.videos.length === 0" :description="$t('localFiles.noVideos')" />
+          <n-empty
+            v-if="selectedFolder.videos.length === 0"
+            :description="$t('localFiles.noVideos')"
+          />
           <div v-else class="video-grid">
-            <n-card v-for="video in selectedFolder.videos" :key="video.path" size="small" class="video-card" content-style="padding: 0">
+            <n-card
+              v-for="video in selectedFolder.videos"
+              :key="video.path"
+              size="small"
+              class="video-card"
+              content-style="padding: 0"
+            >
               <div class="video-cover" @click="playVideo(video)">
+                <img
+                  v-if="video.thumbnail"
+                  class="video-preview"
+                  :src="previewSource(video.thumbnail)"
+                  loading="lazy"
+                  alt=""
+                />
                 <video
+                  v-else
                   class="video-preview"
                   :src="previewSource(video.path)"
-                  :poster="video.thumbnail ? previewSource(video.thumbnail) : undefined"
                   preload="metadata"
                   muted
                   playsinline
                 />
-                <div class="play-overlay"><n-icon size="30"><icon-mdi-play /></n-icon></div>
+                <div class="play-overlay">
+                  <n-icon size="30"><icon-mdi-play /></n-icon>
+                </div>
                 <n-tooltip v-if="uploadedUrls[video.path]" trigger="hover">
                   <template #trigger>
-                    <div class="cloud-badge" :title="$t('localFiles.copyR2Url')" @click.stop="copyR2Url(video)">
+                    <div
+                      class="cloud-badge"
+                      :title="$t('localFiles.copyR2Url')"
+                      @click.stop="copyR2Url(video)"
+                    >
                       <n-icon size="13"><icon-mdi-cloud-check /></n-icon>
                       <span>R2</span>
                     </div>
@@ -424,35 +498,95 @@ onUnmounted(() => {
               </div>
               <div class="video-info">
                 <n-ellipsis :line-clamp="2" :tooltip="false">{{ video.name }}</n-ellipsis>
-                <n-text depth="3" class="video-meta">{{ formatSize(video.size) }} · {{ formatDate(video.modified) }}</n-text>
+                <n-text depth="3" class="video-meta">
+                  {{ formatSize(video.size) }} · {{ formatDate(video.modified) }}
+                </n-text>
                 <n-flex :size="4" justify="end" align="center">
-                  <n-tag v-if="uploadedUrls[video.path]" size="tiny" round type="success" :title="$t('localFiles.r2Available')">R2</n-tag>
-                  <n-flex v-if="uploading[video.path]" :size="4" align="center" class="upload-progress">
+                  <n-tag
+                    v-if="uploadedUrls[video.path]"
+                    size="tiny"
+                    round
+                    type="success"
+                    :title="$t('localFiles.r2Available')"
+                  >
+                    R2
+                  </n-tag>
+                  <n-flex
+                    v-if="uploading[video.path]"
+                    :size="4"
+                    align="center"
+                    class="upload-progress"
+                  >
                     <n-progress
                       type="line"
                       :percentage="Math.round(uploading[video.path].percent)"
                       :show-indicator="false"
                       style="width: 72px"
                     />
-                    <n-text depth="3" class="upload-progress-label">{{ formatUploadProgress(uploading[video.path]) }}</n-text>
-                    <n-button text size="tiny" type="warning" :title="$t('localFiles.cancelUpload')" @click="cancelUpload(video)">
-                      <template #icon><n-icon><icon-mdi-close /></n-icon></template>
+                    <n-text depth="3" class="upload-progress-label">
+                      {{ formatUploadProgress(uploading[video.path]) }}
+                    </n-text>
+                    <n-button
+                      text
+                      size="tiny"
+                      type="warning"
+                      :title="$t('localFiles.cancelUpload')"
+                      @click="cancelUpload(video)"
+                    >
+                      <template #icon>
+                        <n-icon><icon-mdi-close /></n-icon>
+                      </template>
                     </n-button>
                   </n-flex>
-                  <n-button v-else text size="tiny" :type="uploadedUrls[video.path] ? 'success' : 'primary'" :loading="Boolean(uploading[video.path])" :title="uploadedUrls[video.path] ? $t('localFiles.copyR2Url') : $t('localFiles.uploadToR2')" @click="uploadVideo(video, selectedFolder)">
-                    <template #icon><n-icon><icon-simple-icons-cloudflare /></n-icon></template>
+                  <n-button
+                    v-else
+                    text
+                    size="tiny"
+                    :type="uploadedUrls[video.path] ? 'success' : 'primary'"
+                    :loading="Boolean(uploading[video.path])"
+                    :title="
+                      uploadedUrls[video.path]
+                        ? $t('localFiles.copyR2Url')
+                        : $t('localFiles.uploadToR2')
+                    "
+                    @click="uploadVideo(video, selectedFolder)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-simple-icons-cloudflare /></n-icon>
+                    </template>
                   </n-button>
-                  <n-button v-if="uploadedUrls[video.path]" text size="tiny" type="success" :title="$t('localFiles.copyR2Url')" @click="copyR2Url(video)">
-                    <template #icon><n-icon><icon-mdi-link-variant /></n-icon></template>
+                  <n-button
+                    v-if="uploadedUrls[video.path]"
+                    text
+                    size="tiny"
+                    type="success"
+                    :title="$t('localFiles.copyR2Url')"
+                    @click="copyR2Url(video)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-mdi-link-variant /></n-icon>
+                    </template>
                   </n-button>
-                  <n-button text size="tiny" type="primary" :title="$t('localFiles.splitChapters')" @click="splitChapters(video)">
-                    <template #icon><n-icon><icon-mdi-content-cut /></n-icon></template>
+                  <n-button
+                    text
+                    size="tiny"
+                    type="primary"
+                    :title="$t('localFiles.splitChapters')"
+                    @click="splitChapters(video)"
+                  >
+                    <template #icon>
+                      <n-icon><icon-mdi-content-cut /></n-icon>
+                    </template>
                   </n-button>
                   <n-button text size="tiny" @click="copyPath(video.path)">
-                    <template #icon><n-icon><icon-mdi-content-copy /></n-icon></template>
+                    <template #icon>
+                      <n-icon><icon-mdi-content-copy /></n-icon>
+                    </template>
                   </n-button>
                   <n-button text size="tiny" type="error" @click="deleteVideo(video)">
-                    <template #icon><n-icon><icon-mdi-delete-outline /></n-icon></template>
+                    <template #icon>
+                      <n-icon><icon-mdi-delete-outline /></n-icon>
+                    </template>
                   </n-button>
                 </n-flex>
               </div>

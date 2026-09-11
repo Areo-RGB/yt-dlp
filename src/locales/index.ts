@@ -30,7 +30,6 @@ const localeMap = new Map(localeEntries.map((e) => [e.code, e]));
 /** 应用固定使用英文 */
 export const resolveLocale = (_locale: string): string => "en-US";
 
-
 // ==================== i18n 实例 ====================
 
 const defaultLocale = "en-US";
